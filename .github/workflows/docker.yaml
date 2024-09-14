@@ -41,9 +41,8 @@ jobs:
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }} .
         
       - name: Publish images
-        env:
-          GITHUB_PAT: ${{ secrets.pat }}
         run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u Jaumoso --password-stdin
           docker push ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }}
           docker push ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }}
           
