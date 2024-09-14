@@ -1,0 +1,23 @@
+services:
+  homelab-dashboad-front:
+    container_name: homelab-dashboard-front
+    image: ghcr.io/jaumoso/homelab-dashboard-front:latest
+    ports:
+      - 4200:80
+    depends_on:
+      - homelab-dashboad-back
+    networks:
+      - homelab-dashboard
+
+  homelab-dashboad-back:
+    container_name: homelab-dashboad-back
+    image: ghcr.io/jaumoso/homelab-dashboard-back:latest
+    ports:
+      - 3000:4000
+    networks:
+      - homelab-dashboard
+    volumes:
+      - ./data:/app
+
+networks:
+  homelab-dashboard:
