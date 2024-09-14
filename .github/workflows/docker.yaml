@@ -1,0 +1,50 @@
+name: Docker
+run-name: Docker image creation
+on:
+  workflow_dispatch:
+env:
+  DOCKER_IMAGE_BASE: ghcr.io/homelab-dashboard/homelab-dashboard
+  DOCKER_IMAGE_TAG: latest
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '1'
+
+      - name: Get npm cache directory
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - name: Cache npm dependencies
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: '~/.npm'
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        working-directory: backend
+        run: npm ci
+
+      - name: Create Docker image frontend
+        working-directory: frontend
+        run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
+
+      - name: Create Docker image backend
+        working-directory: backend
+        run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }} .
+        
+      - name: Publish images
+        env:
+          GITHUB_PAT: ${{ secrets.pat }}
+        run: |
+          docker push ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }}
+          docker push ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }}
+          
+
