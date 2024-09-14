@@ -3,7 +3,7 @@ run-name: Docker image creation
 on:
   workflow_dispatch:
 env:
-  DOCKER_IMAGE_BASE: ghcr.io/Jaumoso/homelab-dashboard
+  DOCKER_IMAGE_BASE: ghcr.io/jaumoso/homelab-dashboard
   DOCKER_IMAGE_TAG: latest
 jobs:
   docker:
