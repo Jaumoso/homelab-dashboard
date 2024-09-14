@@ -1,6 +1,8 @@
 let selectedRow = null;
 let selectedId = null;
 
+const BACKEND_URL = 'homelab-dashboard-back';
+
 // Retrieve data when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadTableData();
@@ -20,7 +22,7 @@ document.getElementById('addServiceBtn').addEventListener('click', function() {
 
 // Add a new row
 function insertNewRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink) {
-    fetch('http://localhost:3000/api/services', {
+    fetch(`http://${BACKEND_URL}:3000/api/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ icon, serviceName, cloudflareLink, tailscaleLink, localhostLink })
@@ -31,7 +33,7 @@ function insertNewRow(icon, serviceName, cloudflareLink, tailscaleLink, localhos
 
 // Load table data
 function loadTableData() {
-    fetch('http://localhost:3000/api/services')
+    fetch(`http://${BACKEND_URL}:3000/api/services`)
     .then(response => response.json())
     .then(services => {
         const tableBody = document.querySelector('#serviceTable tbody');
@@ -59,7 +61,7 @@ function loadTableData() {
 //  Modify Row
 function editRow(id) {
     selectedId = id;
-    fetch(`http://localhost:3000/api/services/${id}`)
+    fetch(`http://${BACKEND_URL}:3000/api/services/${id}`)
     .then(response => response.json())
     .then(service => {
         document.getElementById('iconInput').value = service.icon;
@@ -82,7 +84,7 @@ document.getElementById('updateServiceBtn').addEventListener('click', function()
     const tailscaleLink = document.getElementById('tailscaleLinkInput').value;
     const localhostLink = document.getElementById('localhostLinkInput').value;
 
-    fetch(`http://localhost:3000/api/services/${selectedId}`, {
+    fetch(`http://${BACKEND_URL}:3000/api/services/${selectedId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ icon, serviceName, cloudflareLink, tailscaleLink, localhostLink })
@@ -95,7 +97,7 @@ document.getElementById('updateServiceBtn').addEventListener('click', function()
 
 // Remove Service
 function deleteRow(id) {
-    fetch(`http://localhost:3000/api/services/${id}`, {
+    fetch(`http://${BACKEND_URL}:3000/api/services/${id}`, {
         method: 'DELETE'
     })
     .then(() => loadTableData());

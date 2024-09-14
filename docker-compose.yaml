@@ -5,19 +5,18 @@ services:
     ports:
       - 4200:80
     depends_on:
-      - homelab-dashboad-back
+      - homelab-dashboard-back
     networks:
       - homelab-dashboard
 
-  homelab-dashboad-back:
-    container_name: homelab-dashboad-back
+  homelab-dashboard-back:
+    container_name: homelab-dashboard-back
     image: ghcr.io/jaumoso/homelab-dashboard-back:latest
     ports:
-      - 3000:4000
+      - 3000:3000
     networks:
       - homelab-dashboard
-    volumes:
-      - ./data:/app
 
 networks:
   homelab-dashboard:
+    driver: bridge
