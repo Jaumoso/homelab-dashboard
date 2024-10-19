@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: '1'
+          fetch-depth: "1"
 
       - name: Get npm cache directory
         shell: bash
@@ -22,7 +22,7 @@ jobs:
         id: cache-npm
         uses: actions/cache@v4
         with:
-          path: '~/.npm'
+          path: "~/.npm"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
@@ -32,6 +32,10 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Change backend URL in frontend
+        working-directory: frontend
+        run: sed -i 's|const BACKEND_URL = "localhost";|const BACKEND_URL = "homelab-dashboard-back";|' script.js
+
       - name: Create Docker image frontend
         working-directory: frontend
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
@@ -39,7 +43,7 @@ jobs:
       - name: Create Docker image backend
         working-directory: backend
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }} .
-        
+
       - name: Publish images
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u Jaumoso --password-stdin

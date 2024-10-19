@@ -1,6 +1,7 @@
 let selectedRow = null;
 let selectedId = null;
 
+// 'localhost' for loccal development. It is replaced by the backend container name in the docker build process
 const BACKEND_URL = "localhost";
 
 // Retrieve data when the page loads
