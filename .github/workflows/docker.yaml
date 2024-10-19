@@ -32,10 +32,6 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Change backend URL in frontend
-        working-directory: frontend
-        run: sed -i 's|const BACKEND_URL = "localhost";|const BACKEND_URL = "homelab-dashboard-back";|' script.js
-
       - name: Create Docker image frontend
         working-directory: frontend
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
