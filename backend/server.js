@@ -2,6 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+const RateLimit = require('express-rate-limit');
+
+const limiter = RateLimit({
+    windowsMs: 5 * 60 * 1000, // 5 minutes
+    max: 100, // max 100 requests per windowMS
+});
 
 const app = express();
 const PORT = 3000;
@@ -9,6 +15,7 @@ const PORT = 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(limiter);
 
 // Connection to SQLite database
 const db = new sqlite3.Database('./services.db', (err) => {
