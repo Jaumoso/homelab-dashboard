@@ -1,214 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Homelab</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f7f8;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f7f8;
+      }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
 
-        th, td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
+      th,
+      td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
 
-        th {
-            background-color: #f2f2f2;
-        }
+      th {
+        background-color: #f2f2f2;
+      }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
 
-        .button {
-            padding: 8px 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+      .button {
+        padding: 8px 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
 
-        .button:disabled {
-            background-color: #ccc;
-        }
+      .button:disabled {
+        background-color: #ccc;
+      }
 
-        .delete-button {
-            background-color: #dc3545;
-        }
+      .delete-button {
+        background-color: #dc3545;
+      }
 
-        .edit-button {
-            background-color: #ffc107;
-        }
+      .edit-button {
+        background-color: #ffc107;
+      }
 
-        input[type="text"], input[type="url"] {
-            padding: 8px;
-            width: 90%;
-            margin: 5px 0;
-        }
+      input[type="text"],
+      input[type="url"] {
+        padding: 8px;
+        width: 90%;
+        margin: 5px 0;
+      }
 
-        #form-container {
-            text-align: center;
-        }
+      #form-container {
+        text-align: center;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Homelab Services</h1>
 
     <table id="serviceTable">
-        <thead>
-            <tr>
-                <th>Icon</th>
-                <th>Service Name</th>
-                <th>Cloudflare Link</th>
-                <th>Tailscale Link</th>
-                <th>Localhost Link</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Icon</th>
+          <th>Service Name</th>
+          <th>Cloudflare Link</th>
+          <th>Tailscale Link</th>
+          <th>Localhost Link</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
 
     <div id="form-container">
-        <h3>Add New Service</h3>
-        <input type="text" id="iconInput" placeholder="Icon URL" />
-        <input type="text" id="serviceNameInput" placeholder="Service Name" />
-        <input type="url" id="cloudflareLinkInput" placeholder="Cloudflare Link" />
-        <input type="url" id="tailscaleLinkInput" placeholder="Tailscale Link" />
-        <input type="url" id="localhostLinkInput" placeholder="Localhost Link" />
-        <br>
-        <button class="button" id="addServiceBtn">Add Service</button>
+      <h3>Add New Service</h3>
+      <input type="text" id="iconInput" placeholder="Icon URL" />
+      <input type="text" id="serviceNameInput" placeholder="Service Name" />
+      <input
+        type="url"
+        id="cloudflareLinkInput"
+        placeholder="Cloudflare Link"
+      />
+      <input type="url" id="tailscaleLinkInput" placeholder="Tailscale Link" />
+      <input type="url" id="localhostLinkInput" placeholder="Localhost Link" />
+      <br />
+      <button class="button" id="addServiceBtn">Add Service</button>
     </div>
 
     <script>
-        let selectedRow = null;
+      let selectedRow = null;
 
-        // Load data from LocalStorage when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTableData();
+      // Load data from LocalStorage when the page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        loadTableData();
+      });
+
+      // Add Service Row
+      document
+        .getElementById("addServiceBtn")
+        .addEventListener("click", function () {
+          const icon = document.getElementById("iconInput").value;
+          const serviceName = document.getElementById("serviceNameInput").value;
+          const cloudflareLink = document.getElementById(
+            "cloudflareLinkInput"
+          ).value;
+          const tailscaleLink =
+            document.getElementById("tailscaleLinkInput").value;
+          const localhostLink =
+            document.getElementById("localhostLinkInput").value;
+
+          if (selectedRow === null) {
+            insertNewRow(
+              icon,
+              serviceName,
+              cloudflareLink,
+              tailscaleLink,
+              localhostLink
+            );
+          } else {
+            updateRow(
+              icon,
+              serviceName,
+              cloudflareLink,
+              tailscaleLink,
+              localhostLink
+            );
+          }
+
+          saveTableData(); // Save to LocalStorage
+          clearForm();
         });
 
-        // Add Service Row
-        document.getElementById('addServiceBtn').addEventListener('click', function() {
-            const icon = document.getElementById('iconInput').value;
-            const serviceName = document.getElementById('serviceNameInput').value;
-            const cloudflareLink = document.getElementById('cloudflareLinkInput').value;
-            const tailscaleLink = document.getElementById('tailscaleLinkInput').value;
-            const localhostLink = document.getElementById('localhostLinkInput').value;
+      // Insert New Row
+      function insertNewRow(
+        icon,
+        serviceName,
+        cloudflareLink,
+        tailscaleLink,
+        localhostLink
+      ) {
+        const table = document.querySelector("#serviceTable tbody");
+        const newRow = table.insertRow();
 
-            if (selectedRow === null) {
-                insertNewRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink);
-            } else {
-                updateRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink);
-            }
+        newRow.innerHTML = `
+    <td><img src="${escapeHtml(icon)}" alt="Icon" width="30" height="30"></td>
+    <td>${escapeHtml(serviceName)}</td>
+    <td><a href="${escapeHtml(
+      cloudflareLink
+    )}" target="_blank">Cloudflare</a></td>
+    <td><a href="${escapeHtml(
+      tailscaleLink
+    )}" target="_blank">Tailscale</a></td>
+    <td><a href="${escapeHtml(
+      localhostLink
+    )}" target="_blank">Localhost</a></td>
+    <td>
+        <button class="button edit-button" onclick="editRow(this)">Edit</button>
+        <button class="button delete-button" onclick="deleteRow(this)">Delete</button>
+    </td>
+`;
+      }
 
-            saveTableData(); // Save to LocalStorage
-            clearForm();
+      // Clear Form
+      function clearForm() {
+        document.getElementById("iconInput").value = "";
+        document.getElementById("serviceNameInput").value = "";
+        document.getElementById("cloudflareLinkInput").value = "";
+        document.getElementById("tailscaleLinkInput").value = "";
+        document.getElementById("localhostLinkInput").value = "";
+        selectedRow = null;
+      }
+
+      // Edit Row
+      function editRow(button) {
+        selectedRow = button.parentElement.parentElement;
+        document.getElementById("iconInput").value =
+          selectedRow.cells[0].querySelector("img").src;
+        document.getElementById("serviceNameInput").value =
+          selectedRow.cells[1].innerText;
+        document.getElementById("cloudflareLinkInput").value =
+          selectedRow.cells[2].querySelector("a").href;
+        document.getElementById("tailscaleLinkInput").value =
+          selectedRow.cells[3].querySelector("a").href;
+        document.getElementById("localhostLinkInput").value =
+          selectedRow.cells[4].querySelector("a").href;
+      }
+
+      // Update Row
+      function updateRow(
+        icon,
+        serviceName,
+        cloudflareLink,
+        tailscaleLink,
+        localhostLink
+      ) {
+        selectedRow.cells[0].querySelector("img").src = icon;
+        selectedRow.cells[1].innerText = serviceName;
+        selectedRow.cells[2].querySelector("a").href = cloudflareLink;
+        selectedRow.cells[3].querySelector("a").href = tailscaleLink;
+        selectedRow.cells[4].querySelector("a").href = localhostLink;
+      }
+
+      // Delete Row
+      function deleteRow(button) {
+        const row = button.parentElement.parentElement;
+        document.getElementById("serviceTable").deleteRow(row.rowIndex);
+        saveTableData(); // Save updated table to LocalStorage
+      }
+
+      // Save table data to LocalStorage
+      function saveTableData() {
+        const table = document.querySelector("#serviceTable tbody");
+        const rows = table.querySelectorAll("tr");
+        const tableData = [];
+
+        rows.forEach((row) => {
+          const icon = row.cells[0].querySelector("img").src;
+          const serviceName = row.cells[1].innerText;
+          const cloudflareLink = row.cells[2].querySelector("a").href;
+          const tailscaleLink = row.cells[3].querySelector("a").href;
+          const localhostLink = row.cells[4].querySelector("a").href;
+
+          tableData.push({
+            icon,
+            serviceName,
+            cloudflareLink,
+            tailscaleLink,
+            localhostLink,
+          });
         });
 
-        // Insert New Row
-        function insertNewRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink) {
-            const table = document.querySelector('#serviceTable tbody');
-            const newRow = table.insertRow();
+        localStorage.setItem("homelabServices", JSON.stringify(tableData));
+      }
 
-            newRow.innerHTML = `
-                <td><img src="${icon}" alt="Icon" width="30" height="30"></td>
-                <td>${serviceName}</td>
-                <td><a href="${cloudflareLink}" target="_blank">Cloudflare</a></td>
-                <td><a href="${tailscaleLink}" target="_blank">Tailscale</a></td>
-                <td><a href="${localhostLink}" target="_blank">Localhost</a></td>
-                <td>
-                    <button class="button edit-button" onclick="editRow(this)">Edit</button>
-                    <button class="button delete-button" onclick="deleteRow(this)">Delete</button>
-                </td>
-            `;
-        }
-
-        // Clear Form
-        function clearForm() {
-            document.getElementById('iconInput').value = '';
-            document.getElementById('serviceNameInput').value = '';
-            document.getElementById('cloudflareLinkInput').value = '';
-            document.getElementById('tailscaleLinkInput').value = '';
-            document.getElementById('localhostLinkInput').value = '';
-            selectedRow = null;
-        }
-
-        // Edit Row
-        function editRow(button) {
-            selectedRow = button.parentElement.parentElement;
-            document.getElementById('iconInput').value = selectedRow.cells[0].querySelector('img').src;
-            document.getElementById('serviceNameInput').value = selectedRow.cells[1].innerText;
-            document.getElementById('cloudflareLinkInput').value = selectedRow.cells[2].querySelector('a').href;
-            document.getElementById('tailscaleLinkInput').value = selectedRow.cells[3].querySelector('a').href;
-            document.getElementById('localhostLinkInput').value = selectedRow.cells[4].querySelector('a').href;
-        }
-
-        // Update Row
-        function updateRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink) {
-            selectedRow.cells[0].querySelector('img').src = icon;
-            selectedRow.cells[1].innerText = serviceName;
-            selectedRow.cells[2].querySelector('a').href = cloudflareLink;
-            selectedRow.cells[3].querySelector('a').href = tailscaleLink;
-            selectedRow.cells[4].querySelector('a').href = localhostLink;
-        }
-
-        // Delete Row
-        function deleteRow(button) {
-            const row = button.parentElement.parentElement;
-            document.getElementById('serviceTable').deleteRow(row.rowIndex);
-            saveTableData(); // Save updated table to LocalStorage
-        }
-
-        // Save table data to LocalStorage
-        function saveTableData() {
-            const table = document.querySelector('#serviceTable tbody');
-            const rows = table.querySelectorAll('tr');
-            const tableData = [];
-
-            rows.forEach(row => {
-                const icon = row.cells[0].querySelector('img').src;
-                const serviceName = row.cells[1].innerText;
-                const cloudflareLink = row.cells[2].querySelector('a').href;
-                const tailscaleLink = row.cells[3].querySelector('a').href;
-                const localhostLink = row.cells[4].querySelector('a').href;
-
-                tableData.push({
-                    icon,
-                    serviceName,
-                    cloudflareLink,
-                    tailscaleLink,
-                    localhostLink
-                });
-            });
-
-            localStorage.setItem('homelabServices', JSON.stringify(tableData));
-        }
-
-        // Load table data from LocalStorage
-        function loadTableData() {
-            const tableData = JSON.parse(localStorage.getItem('homelabServices') || '[]');
-            tableData.forEach(service => {
-                insertNewRow(service.icon, service.serviceName, service.cloudflareLink, service.tailscaleLink, service.localhostLink);
-            });
-        }
+      // Load table data from LocalStorage
+      function loadTableData() {
+        const tableData = JSON.parse(
+          localStorage.getItem("homelabServices") || "[]"
+        );
+        tableData.forEach((service) => {
+          insertNewRow(
+            service.icon,
+            service.serviceName,
+            service.cloudflareLink,
+            service.tailscaleLink,
+            service.localhostLink
+          );
+        });
+      }
     </script>
-</body>
+  </body>
 </html>

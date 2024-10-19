@@ -1,39 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Homelab</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <h1>Homelab Services</h1>
 
     <table id="serviceTable">
-        <thead>
-            <tr>
-                <th>Icon</th>
-                <th>Service Name</th>
-                <th>Cloudflare Link</th>
-                <th>Tailscale Link</th>
-                <th>Localhost Link</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Icon</th>
+          <th>Service Name</th>
+          <th>Cloudflare Link</th>
+          <th>Tailscale Link</th>
+          <th>Localhost Link</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
 
     <div id="form-container">
-        <h3>Add New Service</h3>
-        <input type="text" id="iconInput" placeholder="Icon URL" />
-        <input type="text" id="serviceNameInput" placeholder="Service Name" />
-        <input type="url" id="cloudflareLinkInput" placeholder="Cloudflare Link" />
-        <input type="url" id="tailscaleLinkInput" placeholder="Tailscale Link" />
-        <input type="url" id="localhostLinkInput" placeholder="Localhost Link" />
-        <br>
-        <button class="button" id="addServiceBtn">Add Service</button>
+      <h3>Add New Service</h3>
+      <input type="text" id="iconInput" placeholder="Icon URL" />
+      <input type="text" id="serviceNameInput" placeholder="Service Name" />
+      <input
+        type="url"
+        id="cloudflareLinkInput"
+        placeholder="Cloudflare Link"
+      />
+      <input type="url" id="tailscaleLinkInput" placeholder="Tailscale Link" />
+      <input type="url" id="localhostLinkInput" placeholder="Localhost Link" />
+      <br />
+      <button class="button" id="addServiceBtn">Add Service</button>
     </div>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
