@@ -108,6 +108,6 @@ app.delete("/api/services/:id", (req, res) => {
 });
 
 // Turn on the server
-app.listen(PORT, () => {
-  console.log(`API Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`API Server running on port ${PORT}`);
 });

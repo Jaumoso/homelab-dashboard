@@ -1,5 +1,5 @@
 services:
-  homelab-dashboad-front:
+  homelab-dashboard-front:
     container_name: homelab-dashboard-front
     image: ghcr.io/jaumoso/homelab-dashboard-front:latest
     ports:
@@ -12,8 +12,6 @@ services:
   homelab-dashboard-back:
     container_name: homelab-dashboard-back
     image: ghcr.io/jaumoso/homelab-dashboard-back:latest
-    ports:
-      - 3000:3000
     networks:
       - homelab-dashboard
 
