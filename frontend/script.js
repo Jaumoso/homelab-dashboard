@@ -1,7 +1,10 @@
 let selectedRow = null;
 let selectedId = null;
 
-const BACKEND_URL = "homelab-dashboard-back";
+const BACKEND_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000/api"
+    : "/api";
 
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
@@ -28,7 +31,7 @@ function insertNewRow(
   tailscaleLink,
   localhostLink
 ) {
-  fetch(`http://${BACKEND_URL}:3000/api/services`, {
+  fetch(`${BACKEND_URL}/services`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -45,7 +48,7 @@ function insertNewRow(
 
 // Load table data
 function loadTableData() {
-  fetch(`http://${BACKEND_URL}:3000/api/services`)
+  fetch(`${BACKEND_URL}services`)
     .then((response) => response.json())
     .then((services) => {
       const tableBody = document.querySelector("#serviceTable tbody");
@@ -73,7 +76,7 @@ function loadTableData() {
 //  Modify Row
 function editRow(id) {
   selectedId = id;
-  fetch(`http://${BACKEND_URL}:3000/api/services/${id}`)
+  fetch(`${BACKEND_URL}services/${id}`)
     .then((response) => response.json())
     .then((service) => {
       document.getElementById("iconInput").value = service.icon;
@@ -101,7 +104,7 @@ document
     const tailscaleLink = document.getElementById("tailscaleLinkInput").value;
     const localhostLink = document.getElementById("localhostLinkInput").value;
 
-    fetch(`http://${BACKEND_URL}:3000/api/services/${selectedId}`, {
+    fetch(`${BACKEND_URL}services/${selectedId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -119,7 +122,7 @@ document
 
 // Remove Service
 function deleteRow(id) {
-  fetch(`http://${BACKEND_URL}:3000/api/services/${id}`, {
+  fetch(`${BACKEND_URL}services/${id}`, {
     method: "DELETE",
   }).then(() => loadTableData());
 }
