@@ -1,7 +1,7 @@
 let selectedRow = null;
 let selectedId = null;
 
-const BACKEND_URL = "localhost";
+const BACKEND_URL = "homelab-dashboard-back";
 
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
