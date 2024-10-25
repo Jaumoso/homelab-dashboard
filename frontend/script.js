@@ -48,7 +48,7 @@ function insertNewRow(
 
 // Load table data
 function loadTableData() {
-  fetch(`${BACKEND_URL}services`)
+  fetch(`${BACKEND_URL}/services`)
     .then((response) => response.json())
     .then((services) => {
       const tableBody = document.querySelector("#serviceTable tbody");
@@ -76,7 +76,7 @@ function loadTableData() {
 //  Modify Row
 function editRow(id) {
   selectedId = id;
-  fetch(`${BACKEND_URL}services/${id}`)
+  fetch(`${BACKEND_URL}/services/${id}`)
     .then((response) => response.json())
     .then((service) => {
       document.getElementById("iconInput").value = service.icon;
@@ -104,7 +104,7 @@ document
     const tailscaleLink = document.getElementById("tailscaleLinkInput").value;
     const localhostLink = document.getElementById("localhostLinkInput").value;
 
-    fetch(`${BACKEND_URL}services/${selectedId}`, {
+    fetch(`${BACKEND_URL}/services/${selectedId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -122,7 +122,7 @@ document
 
 // Remove Service
 function deleteRow(id) {
-  fetch(`${BACKEND_URL}services/${id}`, {
+  fetch(`${BACKEND_URL}/services/${id}`, {
     method: "DELETE",
   }).then(() => loadTableData());
 }
