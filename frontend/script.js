@@ -120,6 +120,9 @@ document
       loadTableData();
       clearForm();
     });
+    document.getElementById("updateServiceBtn").style.display = "none";
+    document.getElementById("addServiceBtn").style.display = "inline";
+    document.getElementById("form-title").innerText = "Add New Service";
   });
 
 // Remove Service
