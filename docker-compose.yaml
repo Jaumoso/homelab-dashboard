@@ -12,6 +12,8 @@ services:
   homelab-dashboard-back:
     container_name: homelab-dashboard-back
     image: ghcr.io/jaumoso/homelab-dashboard-back:latest
+    volumes:
+      - ./:/app/db
     networks:
       - homelab-dashboard
 
