@@ -21,7 +21,7 @@ app.use(limiter);
 app.set("trust proxy", 1);
 
 // Connection to SQLite database
-const db = new sqlite3.Database("./services.db", (err) => {
+const db = new sqlite3.Database("./db/services.db", (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
   } else {
