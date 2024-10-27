@@ -6,6 +6,8 @@ const BACKEND_URL =
     ? "http://localhost:3000/api"
     : "/api";
 
+// const BACKEND_URL = "http://localhost:3000/api";
+
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadTableData();

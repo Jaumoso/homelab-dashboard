@@ -17,6 +17,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(limiter);
 
+// Trust frontend proxy
+app.set("trust proxy", 1);
+
 // Connection to SQLite database
 const db = new sqlite3.Database("./services.db", (err) => {
   if (err) {
