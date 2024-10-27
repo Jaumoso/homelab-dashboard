@@ -2,6 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f4f7f8;
+    color: #333;
     user-select: none;
 }
 
@@ -59,4 +60,64 @@ input[type="text"], input[type="url"] {
 
 #form-container {
     text-align: center;
+}
+
+/* Tema oscuro */
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.header-container h1 {
+    text-align: center;
+    flex: 1;
+}
+
+.theme-toggle {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+body.dark-theme {
+    background-color: #333;
+    color: #f4f7f8;
+}
+
+.dark-theme .theme-toggle {
+    filter: invert(100%);
+}
+
+.dark-theme .serviceUrl {
+    filter: invert(100%);
+}
+
+.dark-theme h1 {
+    background-color: #333;
+    color: #f4f7f8;
+}
+
+.dark-theme th {
+    background-color: #444;
+    color: #f4f7f8;
+}
+
+.dark-theme tr:nth-child(even) {
+    background-color: #555;
+}
+
+.dark-theme .button {
+    background-color: #007bff;
+}
+
+.dark-theme .delete-button {
+    background-color: #ff4c4c;
+}
+
+.dark-theme .edit-button {
+    background-color: #ffc107;
 }

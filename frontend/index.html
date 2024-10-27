@@ -7,7 +7,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Homelab Services</h1>
+    <div class="header-container">
+      <h1>Homelab Services</h1>
+      <div class="theme-toggle">
+        <label for="themeToggle">
+          <img src="assets/theme32.png" alt="Theme button" />
+        </label>
+        <button id="themeToggle" class="button" hidden>Toggle Theme</button>
+      </div>
+    </div>
 
     <table id="serviceTable">
       <thead>

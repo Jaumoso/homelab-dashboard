@@ -1,16 +1,31 @@
 let selectedRow = null;
 let selectedId = null;
+let theme = localStorage.getItem("homelab-dashboard-theme") || "light";
+document.body.classList.add(theme === "dark" ? "dark-theme" : "light-theme");
 
-const BACKEND_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000/api"
-    : "/api";
+// const BACKEND_URL =
+//   window.location.hostname === "localhost"
+//     ? "http://localhost:3000/api"
+//     : "/api";
 
-// const BACKEND_URL = "http://localhost:3000/api";
+const BACKEND_URL = "http://localhost:3000/api";
 
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadTableData();
+});
+
+// Theme toggle
+document.getElementById("themeToggle").addEventListener("click", function () {
+  theme = localStorage.getItem("homelab-dashboard-theme") || "light";
+
+  if (theme === "light") {
+    document.body.classList.add("dark-theme");
+    localStorage.setItem("homelab-dashboard-theme", "dark");
+  } else {
+    document.body.classList.remove("dark-theme");
+    localStorage.setItem("homelab-dashboard-theme", "light");
+  }
 });
 
 // Add new service to table
@@ -61,9 +76,9 @@ function loadTableData() {
                 <tr>
                     <td><img src="${service.icon}" alt="Icon" width="30" height="30"></td>
                     <td>${service.serviceName}</td>
-                    <td><a href="${service.cloudflareLink}" target="_blank">${service.cloudflareLink}</a></td>
-                    <td><a href="${service.tailscaleLink}" target="_blank">${service.tailscaleLink}</a></td>
-                    <td><a href="${service.localhostLink}" target="_blank">${service.localhostLink}</a></td>
+                    <td><a href="${service.cloudflareLink}" class="serviceUrl" target="_blank">${service.cloudflareLink}</a></td>
+                    <td><a href="${service.tailscaleLink}" class="serviceUrl" target="_blank">${service.tailscaleLink}</a></td>
+                    <td><a href="${service.localhostLink}" class="serviceUrl" target="_blank">${service.localhostLink}</a></td>
                     <td>
                         <button class="button edit-button" onclick="editRow(${service.id})">Edit</button>
                         <button class="button delete-button" onclick="deleteRow(${service.id})">Delete</button>
