@@ -32,6 +32,12 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Change backend url
+        working-directory: frontend
+        run: |
+          sed -i 's|^const BACKEND_URL = .*|const BACKEND_URL = "/api";|' script.js
+          grep 'BACKEND_URL' script.js
+
       - name: Create Docker image frontend
         working-directory: frontend
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
