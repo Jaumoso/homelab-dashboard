@@ -14,6 +14,12 @@ jobs:
         with:
           fetch-depth: "1"
 
+      - name: Change backend url
+        working-directory: frontend
+        run: |
+          sed -i 's|^const BACKEND_URL = .*|const BACKEND_URL = "/api";|' script.js
+          grep 'BACKEND_URL' script.js
+
       - name: Get npm cache directory
         shell: bash
         run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
@@ -32,12 +38,6 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Change backend url
-        working-directory: frontend
-        run: |
-          sed -i 's|^const BACKEND_URL = .*|const BACKEND_URL = "/api";|' script.js
-          grep 'BACKEND_URL' script.js
-
       - name: Create Docker image frontend
         working-directory: frontend
         run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
@@ -51,19 +51,3 @@ jobs:
           echo ${{ secrets.PAT }} | docker login ghcr.io -u Jaumoso --password-stdin
           docker push ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }}
           docker push ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }}
-
-      # - name: Build and push image - frontend
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     context: frontend
-      #     push: true
-      #     tags: |
-      #       ghcr.io/jaumoso/homelab-dashboard/${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }}
-
-      # - name: Build and push image - backend
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     context: frontend
-      #     push: true
-      #     tags: |
-      #       ghcr.io/jaumoso/homelab-dashboard/${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }}

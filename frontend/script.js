@@ -3,7 +3,11 @@ let selectedId = null;
 let theme = localStorage.getItem("homelab-dashboard-theme") || "light";
 document.body.classList.add(theme === "dark" ? "dark-theme" : "light-theme");
 
-// Automatically changed when creating docker images with GitHub Actions
+// const BACKEND_URL =
+//   window.location.hostname === "localhost"
+//     ? "http://localhost:3000/api"
+//     : "/api";
+
 const BACKEND_URL = "http://localhost:3000/api";
 
 // Retrieve data when the page loads
