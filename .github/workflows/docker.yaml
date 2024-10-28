@@ -14,12 +14,6 @@ jobs:
         with:
           fetch-depth: "1"
 
-      - name: Change backend url
-        working-directory: frontend
-        run: |
-          sed -i 's|^const BACKEND_URL = .*|const BACKEND_URL = "/api";|' script.js
-          grep 'BACKEND_URL' script.js
-
       - name: Get npm cache directory
         shell: bash
         run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
