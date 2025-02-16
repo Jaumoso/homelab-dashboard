@@ -1,0 +1,31 @@
+services:
+  homelab-dashboard-front:
+    container_name: homelab-dashboard-front
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 4200:80
+    depends_on:
+      - homelab-dashboard-back
+    networks:
+      - homelab-dashboard
+
+  homelab-dashboard-back:
+    container_name: homelab-dashboard-back
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ./backend/db:/app/db
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - homelab-dashboard
+
+networks:
+  homelab-dashboard:
+    driver: bridge
