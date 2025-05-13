@@ -3,8 +3,6 @@ let selectedId = null;
 let theme = localStorage.getItem("homelab-dashboard-theme") || "light";
 document.body.classList.add(theme === "dark" ? "dark-theme" : "light-theme");
 
-const BACKEND_URL = "http://localhost:3000/api";
-
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadTableData();
@@ -43,7 +41,7 @@ function insertNewRow(
   tailscaleLink,
   localhostLink
 ) {
-  fetch(`${BACKEND_URL}/services`, {
+  fetch("/services", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -60,7 +58,7 @@ function insertNewRow(
 
 // Load table data
 function loadTableData() {
-  fetch(`${BACKEND_URL}/services`)
+  fetch("/services")
     .then((response) => response.json())
     .then((services) => {
       const tableBody = document.querySelector("#serviceTable tbody");
@@ -88,7 +86,7 @@ function loadTableData() {
 //  Modify Row
 function editRow(id) {
   selectedId = id;
-  fetch(`${BACKEND_URL}/services/${id}`)
+  fetch(`/services/${id}`)
     .then((response) => response.json())
     .then((service) => {
       document.getElementById("iconInput").value = service.icon;
@@ -116,7 +114,7 @@ document
     const tailscaleLink = document.getElementById("tailscaleLinkInput").value;
     const localhostLink = document.getElementById("localhostLinkInput").value;
 
-    fetch(`${BACKEND_URL}/services/${selectedId}`, {
+    fetch(`/services/${selectedId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -137,7 +135,7 @@ document
 
 // Remove Service
 function deleteRow(id) {
-  fetch(`${BACKEND_URL}/services/${id}`, {
+  fetch(`/services/${id}`, {
     method: "DELETE",
   }).then(() => loadTableData());
 }

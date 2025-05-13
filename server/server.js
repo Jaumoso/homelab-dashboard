@@ -42,7 +42,7 @@ const db = new sqlite3.Database(`./server/db/services.db`, (err) => {
 });
 
 // Obtain all services
-app.get("/api/services", (req, res) => {
+app.get("/services", (req, res) => {
   db.all("SELECT * FROM services", [], (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -52,7 +52,7 @@ app.get("/api/services", (req, res) => {
 });
 
 // Obtain a service by its id
-app.get("/api/services/:id", (req, res) => {
+app.get("/services/:id", (req, res) => {
   db.get("SELECT * FROM services WHERE id = ?", [req.params.id], (err, row) => {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -62,7 +62,7 @@ app.get("/api/services/:id", (req, res) => {
 });
 
 // Add a new service
-app.post("/api/services", (req, res) => {
+app.post("/services", (req, res) => {
   const { icon, serviceName, cloudflareLink, tailscaleLink, localhostLink } =
     req.body;
   const sql =
@@ -83,7 +83,7 @@ app.post("/api/services", (req, res) => {
 });
 
 // Modify a service
-app.put("/api/services/:id", (req, res) => {
+app.put("/services/:id", (req, res) => {
   const { icon, serviceName, cloudflareLink, tailscaleLink, localhostLink } =
     req.body;
   const sql =
@@ -105,7 +105,7 @@ app.put("/api/services/:id", (req, res) => {
 });
 
 // Remove a service
-app.delete("/api/services/:id", (req, res) => {
+app.delete("/services/:id", (req, res) => {
   const sql = "DELETE FROM services WHERE id = ?";
   db.run(sql, req.params.id, function (err) {
     if (err) {
@@ -115,7 +115,7 @@ app.delete("/api/services/:id", (req, res) => {
   });
 });
 
-// app.get("/api/containers", async (req, res) => {
+// app.get("/containers", async (req, res) => {
 //   try {
 //     const containers = await docker.listContainers();
 //     const services = containers.map((container) => {
