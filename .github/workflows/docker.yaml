@@ -2,6 +2,9 @@ name: Docker
 run-name: Docker image creation
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
 env:
   DOCKER_IMAGE_BASE: ghcr.io/jaumoso/homelab-dashboard
   DOCKER_IMAGE_TAG: latest
