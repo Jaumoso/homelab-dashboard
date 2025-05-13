@@ -3,14 +3,21 @@ const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
 const RateLimit = require("express-rate-limit");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
+// const Docker = require("dockerode");
+// const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+
+const rootDir = path.resolve(__dirname, "..");
+console.log("Root directory:", rootDir);
 const limiter = RateLimit({
   windowsMs: 5 * 60 * 1000, // 5 minutes
   max: 100, // max 100 requests per windowMS
 });
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -21,7 +28,7 @@ app.use(limiter);
 app.set("trust proxy", 1);
 
 // Connection to SQLite database
-const db = new sqlite3.Database("./db/services.db", (err) => {
+const db = new sqlite3.Database(`${rootDir}/server/db/services.db`, (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
   } else {
@@ -110,7 +117,38 @@ app.delete("/api/services/:id", (req, res) => {
   });
 });
 
+// app.get("/api/containers", async (req, res) => {
+//   try {
+//     const containers = await docker.listContainers();
+//     const services = containers.map((container) => {
+//       const ports = container.Ports.map((port) => ({
+//         internal: port.PrivatePort,
+//         external: port.PublicPort,
+//         type: port.Type,
+//         ip: port.IP,
+//       }));
+//       return {
+//         id: container.Id,
+//         name: container.Names[0].substring(1),
+//         state: container.State,
+//         status: container.Status,
+//         ports: ports,
+//       };
+//     });
+//     res.json(services);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+
+const frontendPath = path.resolve(__dirname, "../public");
+app.use(express.static(frontendPath));
+
+app.get("/", (_, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
+
 // Turn on the server
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`API Server running on port ${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -1,24 +1,10 @@
 services:
-  homelab-dashboard-front:
-    container_name: homelab-dashboard-front
-    image: ghcr.io/jaumoso/homelab-dashboard-front:latest
+  homelab-dashboard:
+    container_name: homelab-dashboard
+    image: ghcr.io/jaumoso/homelab-dashboard:latest
     restart: unless-stopped
     ports:
-      - 4200:80
-    depends_on:
-      - homelab-dashboard-back
-    networks:
-      - homelab-dashboard
-
-  homelab-dashboard-back:
-    container_name: homelab-dashboard-back
-    image: ghcr.io/jaumoso/homelab-dashboard-back:latest
-    restart: unless-stopped
+      - 3000:3000
     volumes:
-      - ./:/app/db
-    networks:
-      - homelab-dashboard
-
-networks:
-  homelab-dashboard:
-    driver: bridge
+      - ./database:/app/db
+      # - /var/run/docker.sock:/var/run/docker.sock

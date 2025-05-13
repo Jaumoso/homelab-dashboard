@@ -29,25 +29,13 @@ jobs:
 
       - name: Install dependencies
         if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        working-directory: backend
+        working-directory: server
         run: npm ci
 
-      - name: Change backend url
-        working-directory: frontend
-        run: |
-          sed -i 's|^const BACKEND_URL = .*|const BACKEND_URL = "/api";|' script.js
-          grep 'BACKEND_URL' script.js
-
-      - name: Create Docker image frontend
-        working-directory: frontend
-        run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }} .
-
-      - name: Create Docker image backend
-        working-directory: backend
-        run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }} .
+      - name: Create Docker image
+        run: docker build -t ${{ env.DOCKER_IMAGE_BASE }}:${{ env.DOCKER_IMAGE_TAG }} .
 
       - name: Publish images
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u Jaumoso --password-stdin
-          docker push ${{ env.DOCKER_IMAGE_BASE }}-front:${{ env.DOCKER_IMAGE_TAG }}
-          docker push ${{ env.DOCKER_IMAGE_BASE }}-back:${{ env.DOCKER_IMAGE_TAG }}
+          docker push ${{ env.DOCKER_IMAGE_BASE }}:${{ env.DOCKER_IMAGE_TAG }}
