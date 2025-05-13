@@ -155,3 +155,97 @@ function clearForm() {
   document.getElementById("updateServiceBtn").style.display = "none";
   document.getElementById("form-title").innerText = "Add New Service";
 }
+
+function isValidUrl(str) {
+  try {
+    new URL(str);
+    return true;
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return false;
+  }
+}
+
+function normalizeIconInput() {
+  const input = document.getElementById("iconInput");
+  const value = input.value.trim();
+
+  if (!value) return;
+
+  if (!isValidUrl(value)) {
+    input.value = `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${value}.png`;
+  }
+}
+
+document
+  .getElementById("iconInput")
+  .addEventListener("blur", normalizeIconInput);
+
+// DOCKER CONTAINER SUGGESTIONS
+document.addEventListener("DOMContentLoaded", function () {
+  const serviceInput = document.getElementById("serviceInput");
+  const suggestions = document.getElementById("suggestions");
+
+  // Función para mostrar las sugerencias
+  function showSuggestions(services) {
+    suggestions.innerHTML = ""; // Limpiar las sugerencias anteriores
+    if (services.length === 0) {
+      suggestions.style.display = "none";
+      return;
+    }
+    services.forEach((service) => {
+      const div = document.createElement("div");
+      div.textContent = service;
+      suggestions.appendChild(div);
+    });
+    suggestions.style.display = "block";
+  }
+
+  // Cargar contenedores al cargar la página
+  fetch("/docker/containers")
+    .then((response) => response.json())
+    .then((data) => {
+      showSuggestions(data); // Mostrar las sugerencias de contenedores automáticamente
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
+  // Filtrar sugerencias mientras se escribe
+  serviceInput.addEventListener("input", function () {
+    const query = serviceInput.value.toLowerCase();
+
+    if (query.length === 0) {
+      suggestions.style.display = "none";
+      return;
+    }
+
+    // Hacer una solicitud al servidor para obtener los contenedores
+    fetch("/docker/containers")
+      .then((response) => response.json())
+      .then((data) => {
+        const filteredServices = data.filter((service) =>
+          service.toLowerCase().includes(query)
+        );
+        showSuggestions(filteredServices);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  });
+
+  // Manejar el clic en una sugerencia
+  suggestions.addEventListener("click", function (event) {
+    if (event.target && event.target.nodeName === "DIV") {
+      serviceInput.value = event.target.textContent;
+      suggestions.style.display = "none";
+    }
+  });
+
+  // Cerrar las sugerencias si se hace clic fuera del input o la lista
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest("#serviceInput, #suggestions")) {
+      suggestions.style.display = "none";
+    }
+  });
+});

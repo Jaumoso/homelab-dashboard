@@ -6,8 +6,11 @@ const RateLimit = require("express-rate-limit");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
-// const Docker = require("dockerode");
-// const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+const Docker = require("dockerode");
+const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+// const docker = new Docker({
+//   socketPath: "tcp://127.0.0.1:2375", // Usar TCP en Windows
+// });
 
 const limiter = RateLimit({
   windowsMs: 5 * 60 * 1000, // 5 minutes
@@ -138,6 +141,16 @@ app.delete("/services/:id", (req, res) => {
 //     res.status(500).json({ error: err.message });
 //   }
 // });
+
+app.get("/docker/containers", async (req, res) => {
+  try {
+    const containers = await docker.listContainers();
+    res.json(containers);
+  } catch (err) {
+    console.error("Error al obtener contenedores:", err); // Esto te ayudará a entender el error
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const frontendPath = path.resolve(__dirname, "../public");
 app.use(express.static(frontendPath));
