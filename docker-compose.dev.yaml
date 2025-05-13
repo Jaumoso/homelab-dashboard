@@ -8,5 +8,5 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./server/db:/app/db
+      - ./server/db:/app/server/db
       # - /var/run/docker.sock:/var/run/docker.sock

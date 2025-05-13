@@ -9,8 +9,6 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 // const Docker = require("dockerode");
 // const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
-const rootDir = path.resolve(__dirname, "..");
-console.log("Root directory:", rootDir);
 const limiter = RateLimit({
   windowsMs: 5 * 60 * 1000, // 5 minutes
   max: 100, // max 100 requests per windowMS
@@ -28,7 +26,7 @@ app.use(limiter);
 app.set("trust proxy", 1);
 
 // Connection to SQLite database
-const db = new sqlite3.Database(`${rootDir}/server/db/services.db`, (err) => {
+const db = new sqlite3.Database(`./server/db/services.db`, (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
   } else {
