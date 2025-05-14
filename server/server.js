@@ -144,10 +144,49 @@ app.delete("/services/:id", (req, res) => {
 
 app.get("/docker/containers", async (req, res) => {
   try {
-    const containers = await docker.listContainers();
-    res.json(containers);
+    const containers = await docker.listContainers({ all: false });
+
+    const projects = {};
+
+    containers.forEach((container) => {
+      const labels = container.Labels || {};
+      const project = labels["com.docker.compose.project"];
+      const service = labels["com.docker.compose.service"];
+
+      if (!project || !service) return;
+
+      if (!projects[project]) {
+        projects[project] = {
+          containerCount: 0,
+          services: {},
+        };
+      }
+
+      projects[project].containerCount += 1;
+
+      if (!projects[project].services[service]) {
+        projects[project].services[service] = {
+          containers: [],
+        };
+      }
+
+      projects[project].services[service].containers.push({
+        id: container.Id,
+        name: container.Names?.[0]?.replace(/^\//, "") || "",
+        status: container.Status,
+        state: container.State,
+        ports: container.Ports.map((p) => ({
+          private: p.PrivatePort,
+          public: p.PublicPort,
+          type: p.Type,
+          ip: p.IP,
+        })),
+      });
+    });
+
+    res.json(projects);
   } catch (err) {
-    console.error("Error al obtener contenedores:", err); // Esto te ayudará a entender el error
+    console.error("Error al obtener contenedores:", err);
     res.status(500).json({ error: err.message });
   }
 });

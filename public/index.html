@@ -46,10 +46,24 @@
       <br />
       <button class="button" id="addServiceBtn">Add Service</button>
       <button class="button" id="updateServiceBtn" hidden>Save changes</button>
-      <h3>Search and select a service:</h3>
-      <input type="text" id="serviceInput" placeholder="Enter service name" />
-      <div id="suggestions"></div>
     </div>
+
+    <div id="docker-services">
+      <h3>Running Docker Compose Services</h3>
+      <table id="dockerServiceTable">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Ports</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>

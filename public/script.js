@@ -181,71 +181,63 @@ document
   .getElementById("iconInput")
   .addEventListener("blur", normalizeIconInput);
 
-// DOCKER CONTAINER SUGGESTIONS
 document.addEventListener("DOMContentLoaded", function () {
-  const serviceInput = document.getElementById("serviceInput");
-  const suggestions = document.getElementById("suggestions");
+  const dockerTableBody = document.querySelector("#dockerServiceTable tbody");
 
-  // Función para mostrar las sugerencias
-  function showSuggestions(services) {
-    suggestions.innerHTML = ""; // Limpiar las sugerencias anteriores
-    if (services.length === 0) {
-      suggestions.style.display = "none";
-      return;
-    }
-    services.forEach((service) => {
-      const div = document.createElement("div");
-      div.textContent = service;
-      suggestions.appendChild(div);
-    });
-    suggestions.style.display = "block";
-  }
-
-  // Cargar contenedores al cargar la página
   fetch("/docker/containers")
     .then((response) => response.json())
-    .then((data) => {
-      showSuggestions(data); // Mostrar las sugerencias de contenedores automáticamente
+    .then((projects) => {
+      dockerTableBody.innerHTML = "";
+
+      Object.entries(projects).forEach(([projectName, projectData]) => {
+        Object.entries(projectData.services).forEach(
+          ([serviceName, serviceData]) => {
+            serviceData.containers.forEach((container) => {
+              const ports = container.ports
+                .map((p) => {
+                  return `${p.ip || "localhost"}:${p.public || p.private}/${
+                    p.type
+                  }`;
+                })
+                .join(", ");
+
+              const dockerRow = document.createElement("tr");
+              dockerRow.innerHTML = `
+              <td>${projectName}</td>
+              <td>${serviceName}</td>
+              <td>${container.state} (${container.status})</td>
+              <td>${ports || "-"}</td>
+              <td><button class="button" data-service='${JSON.stringify({
+                icon: `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${serviceName}.png`,
+                serviceName: serviceName,
+                cloudflareLink: "",
+                tailscaleLink: "",
+                localhostLink: ports ? `http://${ports.split(", ")[0]}` : "",
+              })}'>Use this</button></td>
+            `;
+              dockerTableBody.appendChild(dockerRow);
+            });
+          }
+        );
+      });
+
+      // Prefill form on click
+      dockerTableBody.addEventListener("click", function (e) {
+        if (e.target && e.target.matches("button[data-service]")) {
+          const data = JSON.parse(e.target.getAttribute("data-service"));
+
+          document.getElementById("iconInput").value = data.icon;
+          document.getElementById("serviceNameInput").value = data.serviceName;
+          document.getElementById("cloudflareLinkInput").value =
+            data.cloudflareLink;
+          document.getElementById("tailscaleLinkInput").value =
+            data.tailscaleLink;
+          document.getElementById("localhostLinkInput").value =
+            data.localhostLink;
+        }
+      });
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching Docker data:", error);
     });
-
-  // Filtrar sugerencias mientras se escribe
-  serviceInput.addEventListener("input", function () {
-    const query = serviceInput.value.toLowerCase();
-
-    if (query.length === 0) {
-      suggestions.style.display = "none";
-      return;
-    }
-
-    // Hacer una solicitud al servidor para obtener los contenedores
-    fetch("/docker/containers")
-      .then((response) => response.json())
-      .then((data) => {
-        const filteredServices = data.filter((service) =>
-          service.toLowerCase().includes(query)
-        );
-        showSuggestions(filteredServices);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  });
-
-  // Manejar el clic en una sugerencia
-  suggestions.addEventListener("click", function (event) {
-    if (event.target && event.target.nodeName === "DIV") {
-      serviceInput.value = event.target.textContent;
-      suggestions.style.display = "none";
-    }
-  });
-
-  // Cerrar las sugerencias si se hace clic fuera del input o la lista
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest("#serviceInput, #suggestions")) {
-      suggestions.style.display = "none";
-    }
-  });
 });
