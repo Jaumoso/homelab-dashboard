@@ -47,6 +47,27 @@
       <button class="button" id="addServiceBtn">Add Service</button>
       <button class="button" id="updateServiceBtn" hidden>Save changes</button>
     </div>
+    <br />
+
+    <div id="form-container">
+      <input
+        type="url"
+        id="cloudflareBaseInput"
+        placeholder="Cloudflare Base URL - https://example.com"
+      />
+      <input
+        type="url"
+        id="tailscaleBaseInput"
+        placeholder="Tailscale Base URL - http://homelab"
+      />
+      <input
+        type="url"
+        id="localhostBaseInput"
+        placeholder="Localhost Base URL - http://127.0.0.1"
+      />
+      <br />
+      <button id="saveBaseUrlsBtn" class="button">Save</button>
+    </div>
 
     <div id="docker-services">
       <h3>Running Docker Compose Services</h3>

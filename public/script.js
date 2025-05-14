@@ -181,6 +181,7 @@ document
   .getElementById("iconInput")
   .addEventListener("blur", normalizeIconInput);
 
+// DOCKER SERVICES
 document.addEventListener("DOMContentLoaded", function () {
   const dockerTableBody = document.querySelector("#dockerServiceTable tbody");
 
@@ -240,4 +241,31 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch((error) => {
       console.error("Error fetching Docker data:", error);
     });
+});
+
+// DEFAULT URLS
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("cloudflareBaseInput").value =
+    localStorage.getItem("cloudflareBase") || "https://example.com";
+  document.getElementById("tailscaleBaseInput").value =
+    localStorage.getItem("tailscaleBase") || "http://homelab";
+  document.getElementById("localhostBaseInput").value =
+    localStorage.getItem("localhostBase") || "http://127.0.0.1";
+});
+
+// Save base URLs
+document.getElementById("saveBaseUrlsBtn").addEventListener("click", () => {
+  localStorage.setItem(
+    "cloudflareBase",
+    document.getElementById("cloudflareBaseInput").value
+  );
+  localStorage.setItem(
+    "tailscaleBase",
+    document.getElementById("tailscaleBaseInput").value
+  );
+  localStorage.setItem(
+    "localhostBase",
+    document.getElementById("localhostBaseInput").value
+  );
+  alert("Base URLs saved!");
 });
