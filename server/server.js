@@ -103,152 +103,152 @@ app.delete("/services/:id", (req, res) => {
   });
 });
 
-// app.get("/docker/containers", async (_, res) => {
-//   try {
-//     const containers = await docker.listContainers({ all: false });
-
-//     const projects = {};
-
-//     containers.forEach((container) => {
-//       const labels = container.Labels || {};
-//       const project = labels["com.docker.compose.project"];
-//       const service = labels["com.docker.compose.service"];
-
-//       if (!project || !service) return;
-
-//       if (!projects[project]) {
-//         projects[project] = {
-//           containerCount: 0,
-//           services: {},
-//         };
-//       }
-
-//       projects[project].containerCount += 1;
-
-//       if (!projects[project].services[service]) {
-//         projects[project].services[service] = {
-//           containers: [],
-//         };
-//       }
-
-//       projects[project].services[service].containers.push({
-//         id: container.Id,
-//         name: container.Names?.[0]?.replace(/^\//, "") || "",
-//         status: container.Status,
-//         state: container.State,
-//         ports: container.Ports.map((p) => ({
-//           private: p.PrivatePort,
-//           public: p.PublicPort,
-//           type: p.Type,
-//           ip: p.IP,
-//         })),
-//       });
-//     });
-
-//     res.json(projects);
-//   } catch (err) {
-//     console.error("Error al obtener contenedores:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
 app.get("/docker/containers", async (_, res) => {
   try {
-    // Mock de contenedor
-    const mockProjects = {
-      "mock-project": {
-        containerCount: 1,
-        services: {
-          "mock-service": {
-            containers: [
-              {
-                id: "1234567890abcdef",
-                name: "mock-container",
-                status: "Up 10 minutes",
-                state: "running",
-                ports: [
-                  {
-                    private: 3000,
-                    public: 8080,
-                    type: "tcp",
-                    ip: "0.0.0.0",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      },
-      "mock-project2": {
-        containerCount: 2,
-        services: {
-          "mock-service1": {
-            containers: [
-              {
-                id: "1234567890abcdef",
-                name: "mock-container",
-                status: "Up 10 minutes",
-                state: "running",
-                ports: [
-                  {
-                    private: 3000,
-                    public: 8080,
-                    type: "tcp",
-                    ip: "0.0.0.0",
-                  },
-                ],
-              },
-            ],
-          },
-          "mock-service2": {
-            containers: [
-              {
-                id: "1234567890abcdef",
-                name: "mock-container",
-                status: "Up 10 minutes",
-                state: "running",
-                ports: [
-                  {
-                    private: 3000,
-                    public: 8080,
-                    type: "tcp",
-                    ip: "0.0.0.0",
-                  },
-                ],
-              },
-              {
-                id: "sadadsdsddsd",
-                name: "mock-container",
-                status: "Up 10 minutes",
-                state: "running",
-                ports: [
-                  {
-                    private: 3000,
-                    public: 8080,
-                    type: "tcp",
-                    ip: "0.0.0.0",
-                  },
-                  {
-                    private: 3000,
-                    public: 8080,
-                    type: "tcp",
-                    ip: "0.0.0.0",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      },
-    };
+    const containers = await docker.listContainers({ all: false });
 
-    // Devuelve el mock directamente
-    res.json(mockProjects);
+    const projects = {};
+
+    containers.forEach((container) => {
+      const labels = container.Labels || {};
+      const project = labels["com.docker.compose.project"];
+      const service = labels["com.docker.compose.service"];
+
+      if (!project || !service) return;
+
+      if (!projects[project]) {
+        projects[project] = {
+          containerCount: 0,
+          services: {},
+        };
+      }
+
+      projects[project].containerCount += 1;
+
+      if (!projects[project].services[service]) {
+        projects[project].services[service] = {
+          containers: [],
+        };
+      }
+
+      projects[project].services[service].containers.push({
+        id: container.Id,
+        name: container.Names?.[0]?.replace(/^\//, "") || "",
+        status: container.Status,
+        state: container.State,
+        ports: container.Ports.map((p) => ({
+          private: p.PrivatePort,
+          public: p.PublicPort,
+          type: p.Type,
+          ip: p.IP,
+        })),
+      });
+    });
+
+    res.json(projects);
   } catch (err) {
     console.error("Error al obtener contenedores:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// app.get("/docker/containers", async (_, res) => {
+//   try {
+//     // Mock de contenedor
+//     const mockProjects = {
+//       "mock-project": {
+//         containerCount: 1,
+//         services: {
+//           "mock-service": {
+//             containers: [
+//               {
+//                 id: "1234567890abcdef",
+//                 name: "mock-container",
+//                 status: "Up 10 minutes",
+//                 state: "running",
+//                 ports: [
+//                   {
+//                     private: 3000,
+//                     public: 8080,
+//                     type: "tcp",
+//                     ip: "0.0.0.0",
+//                   },
+//                 ],
+//               },
+//             ],
+//           },
+//         },
+//       },
+//       "mock-project2": {
+//         containerCount: 2,
+//         services: {
+//           "mock-service1": {
+//             containers: [
+//               {
+//                 id: "1234567890abcdef",
+//                 name: "mock-container",
+//                 status: "Up 10 minutes",
+//                 state: "running",
+//                 ports: [
+//                   {
+//                     private: 3000,
+//                     public: 8080,
+//                     type: "tcp",
+//                     ip: "0.0.0.0",
+//                   },
+//                 ],
+//               },
+//             ],
+//           },
+//           "mock-service2": {
+//             containers: [
+//               {
+//                 id: "1234567890abcdef",
+//                 name: "mock-container",
+//                 status: "Up 10 minutes",
+//                 state: "running",
+//                 ports: [
+//                   {
+//                     private: 3000,
+//                     public: 8080,
+//                     type: "tcp",
+//                     ip: "0.0.0.0",
+//                   },
+//                 ],
+//               },
+//               {
+//                 id: "sadadsdsddsd",
+//                 name: "mock-container",
+//                 status: "Up 10 minutes",
+//                 state: "running",
+//                 ports: [
+//                   {
+//                     private: 3000,
+//                     public: 8080,
+//                     type: "tcp",
+//                     ip: "0.0.0.0",
+//                   },
+//                   {
+//                     private: 3000,
+//                     public: 8080,
+//                     type: "tcp",
+//                     ip: "0.0.0.0",
+//                   },
+//                 ],
+//               },
+//             ],
+//           },
+//         },
+//       },
+//     };
+
+//     // Devuelve el mock directamente
+//     res.json(mockProjects);
+//   } catch (err) {
+//     console.error("Error al obtener contenedores:", err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 const frontendPath = path.resolve(__dirname, "../public");
 app.use(express.static(frontendPath));
