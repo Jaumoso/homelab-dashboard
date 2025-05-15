@@ -34,7 +34,7 @@ const db = new sqlite3.Database(`./server/db/services.db`, (err) => {
     console.error("Error opening database:", err.message);
   } else {
     db.run(
-      "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, urlMask TEXT, externalPort TEXT)",
+      "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, subdomain TEXT, externalPort TEXT)",
       (err) => {
         if (err) {
           console.log("Error creating table:", err.message);
@@ -66,10 +66,10 @@ app.get("/services/:id", (req, res) => {
 
 // Add a new service
 app.post("/services", (req, res) => {
-  const { icon, serviceName, urlMask, externalPort } = req.body;
+  const { icon, serviceName, subdomain, externalPort } = req.body;
   const sql =
-    "INSERT INTO services (icon, serviceName, urlMask, externalPort) VALUES (?, ?, ?, ?)";
-  const params = [icon, serviceName, urlMask, externalPort];
+    "INSERT INTO services (icon, serviceName, subdomain, externalPort) VALUES (?, ?, ?, ?)";
+  const params = [icon, serviceName, subdomain, externalPort];
   db.run(sql, params, function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -80,10 +80,10 @@ app.post("/services", (req, res) => {
 
 // Modify a service
 app.put("/services/:id", (req, res) => {
-  const { icon, serviceName, urlMask, externalPort } = req.body;
+  const { icon, serviceName, subdomain, externalPort } = req.body;
   const sql =
-    "UPDATE services SET icon = ?, serviceName = ?, urlMask = ?, externalPort = ? WHERE id = ?";
-  const params = [icon, serviceName, urlMask, externalPort, req.params.id];
+    "UPDATE services SET icon = ?, serviceName = ?, subdomain = ?, externalPort = ? WHERE id = ?";
+  const params = [icon, serviceName, subdomain, externalPort, req.params.id];
   db.run(sql, params, function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -167,6 +167,67 @@ app.get("/docker/containers", async (_, res) => {
                 status: "Up 10 minutes",
                 state: "running",
                 ports: [
+                  {
+                    private: 3000,
+                    public: 8080,
+                    type: "tcp",
+                    ip: "0.0.0.0",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      "mock-project2": {
+        containerCount: 2,
+        services: {
+          "mock-service1": {
+            containers: [
+              {
+                id: "1234567890abcdef",
+                name: "mock-container",
+                status: "Up 10 minutes",
+                state: "running",
+                ports: [
+                  {
+                    private: 3000,
+                    public: 8080,
+                    type: "tcp",
+                    ip: "0.0.0.0",
+                  },
+                ],
+              },
+            ],
+          },
+          "mock-service2": {
+            containers: [
+              {
+                id: "1234567890abcdef",
+                name: "mock-container",
+                status: "Up 10 minutes",
+                state: "running",
+                ports: [
+                  {
+                    private: 3000,
+                    public: 8080,
+                    type: "tcp",
+                    ip: "0.0.0.0",
+                  },
+                ],
+              },
+              {
+                id: "sadadsdsddsd",
+                name: "mock-container",
+                status: "Up 10 minutes",
+                state: "running",
+                ports: [
+                  {
+                    private: 3000,
+                    public: 8080,
+                    type: "tcp",
+                    ip: "0.0.0.0",
+                  },
                   {
                     private: 3000,
                     public: 8080,

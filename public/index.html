@@ -4,78 +4,178 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Homelab</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    />
     <link rel="Icon" href="./assets/icon24.png" type="image/x-icon" />
   </head>
-  <body>
-    <div class="header-container">
-      <h1>Homelab Services</h1>
-      <div class="theme-toggle">
-        <label for="themeToggle">
-          <img src="assets/theme32.png" alt="Theme button" />
-        </label>
-        <button id="themeToggle" class="button" hidden>Toggle Theme</button>
+  <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div class="container mx-auto p-4">
+      <!-- Enhanced Header -->
+      <div
+        class="header-container flex justify-center items-center relative py-8 mb-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg"
+      >
+        <h1 class="text-4xl font-bold text-center flex-1 text-white">
+          Homelab Services
+        </h1>
+        <div class="theme-toggle absolute right-4">
+          <button
+            id="themeToggle"
+            class="p-2 bg-white dark:bg-gray-800 rounded-full shadow"
+          >
+            <img
+              id="themeIcon"
+              src="assets/theme32.png"
+              alt="Theme button"
+              class="w-8 h-8"
+            />
+          </button>
+        </div>
       </div>
-    </div>
 
-    <table id="serviceTable">
-      <thead>
-        <tr>
-          <th>Icon</th>
-          <th>Service Name</th>
-          <th>Cloudflare Link</th>
-          <th>Tailscale Link</th>
-          <th>Localhost Link</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <!-- Search Bar for Service Table -->
+      <div class="mb-4">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search services..."
+          class="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
-    <div id="form-container">
-      <h3 id="form-title">Add New Service</h3>
-      <input type="text" id="iconInput" placeholder="Icon URL / Service Name" />
-      <input type="text" id="serviceNameInput" placeholder="Service Name" />
-      <input type="text" id="urlMaskInput" placeholder="URL Submask" />
-      <input type="text" id="externalPortInput" placeholder="External Port" />
-      <br />
-      <button class="button" id="addServiceBtn">Add Service</button>
-      <button class="button" id="updateServiceBtn" hidden>Save changes</button>
-    </div>
-    <br />
+      <!-- Service Table -->
+      <div
+        class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+      >
+        <table id="serviceTable" class="min-w-full">
+          <thead>
+            <tr class="bg-gray-200 dark:bg-gray-700">
+              <th class="py-4 px-6 border-b">Icon</th>
+              <th class="py-4 px-6 border-b">Service Name</th>
+              <th class="py-4 px-6 border-b">Cloudflare Link</th>
+              <th class="py-4 px-6 border-b">Tailscale Link</th>
+              <th class="py-4 px-6 border-b">Localhost Link</th>
+              <th class="py-4 px-6 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-    <div id="form-container" class="base-urls-container">
-      <label for="cloudflareBaseInput">Custom domain:</label>
-      <input
-        type="url"
-        id="cloudflareBaseInput"
-        placeholder="https://example.com"
-      />
-      <label for="tailscaleBaseInput">Tailscale Host:</label>
-      <input type="url" id="tailscaleBaseInput" placeholder="http://homelab" />
-      <label for="localhostBaseInput">Localhost / LAN:</label>
-      <input
-        type="url"
-        id="localhostBaseInput"
-        placeholder="http://127.0.0.1"
-      />
-      <br />
-      <button id="saveBaseUrlsBtn" class="button">Save</button>
-    </div>
+      <!-- Form Container -->
+      <div
+        id="form-container"
+        class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+      >
+        <h3 id="form-title" class="text-2xl font-bold mb-6">Add New Service</h3>
+        <input
+          type="text"
+          id="iconInput"
+          placeholder="Icon URL / Service Name"
+          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          id="serviceNameInput"
+          placeholder="Service Name"
+          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          id="subdomainInput"
+          placeholder="URL Submask"
+          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          id="externalPortInput"
+          placeholder="External Port"
+          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div class="flex space-x-4">
+          <button
+            class="flex-1 p-3 bg-green-500 text-white rounded-lg shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            id="addServiceBtn"
+          >
+            Add Service
+          </button>
+          <button
+            class="flex-1 p-3 bg-yellow-500 text-white rounded-lg shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 hidden"
+            id="updateServiceBtn"
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
 
-    <div id="docker-services">
-      <h3>Running Docker Compose Services</h3>
-      <table id="dockerServiceTable">
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Service</th>
-            <th>Status</th>
-            <th>Ports</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <!-- Base URLs Container -->
+      <div
+        id="form-container"
+        class="base-urls-container mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+      >
+        <div class="flex flex-col space-y-4">
+          <div class="flex items-center">
+            <label for="cloudflareBaseInput" class="w-1/3 text-lg"
+              >Custom domain:</label
+            >
+            <input
+              type="url"
+              id="cloudflareBaseInput"
+              placeholder="https://example.com"
+              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="flex items-center">
+            <label for="tailscaleBaseInput" class="w-1/3 text-lg"
+              >Tailscale Host:</label
+            >
+            <input
+              type="url"
+              id="tailscaleBaseInput"
+              placeholder="http://homelab"
+              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="flex items-center">
+            <label for="localhostBaseInput" class="w-1/3 text-lg"
+              >Localhost / LAN:</label
+            >
+            <input
+              type="url"
+              id="localhostBaseInput"
+              placeholder="http://127.0.0.1"
+              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+        <button
+          id="saveBaseUrlsBtn"
+          class="mt-6 p-3 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+        >
+          Save
+        </button>
+      </div>
+
+      <!-- Docker Services -->
+      <div id="docker-services" class="mt-8">
+        <h3 class="text-2xl font-bold mb-6">Running Docker Compose Services</h3>
+        <div
+          class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+        >
+          <table id="dockerServiceTable" class="min-w-full">
+            <thead>
+              <tr class="bg-gray-200 dark:bg-gray-700">
+                <th class="py-4 px-6 border-b">Project</th>
+                <th class="py-4 px-6 border-b">Service</th>
+                <th class="py-4 px-6 border-b">Status</th>
+                <th class="py-4 px-6 border-b">Ports</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <script src="script.js"></script>

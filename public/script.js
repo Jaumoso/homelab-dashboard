@@ -1,11 +1,12 @@
 let selectedRow = null;
 let selectedId = null;
 let theme = localStorage.getItem("homelab-dashboard-theme") || "light";
-document.body.classList.add(theme === "dark" ? "dark-theme" : "light-theme");
+document.body.classList.add(theme === "dark" ? "dark" : "light");
 
 // Retrieve data when the page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadTableData();
+  loadDockerData();
 });
 
 // Theme toggle
@@ -13,10 +14,12 @@ document.getElementById("themeToggle").addEventListener("click", function () {
   theme = localStorage.getItem("homelab-dashboard-theme") || "light";
 
   if (theme === "light") {
-    document.body.classList.add("dark-theme");
+    document.body.classList.add("dark");
+    document.body.classList.remove("light");
     localStorage.setItem("homelab-dashboard-theme", "dark");
   } else {
-    document.body.classList.remove("dark-theme");
+    document.body.classList.add("light");
+    document.body.classList.remove("dark");
     localStorage.setItem("homelab-dashboard-theme", "light");
   }
 });
@@ -25,22 +28,22 @@ document.getElementById("themeToggle").addEventListener("click", function () {
 document.getElementById("addServiceBtn").addEventListener("click", function () {
   const icon = document.getElementById("iconInput").value;
   const serviceName = document.getElementById("serviceNameInput").value;
-  const urlMask = document.getElementById("urlMaskInput").value;
+  const subdomain = document.getElementById("subdomainInput").value;
   const externalPort = document.getElementById("externalPortInput").value;
 
-  insertNewRow(icon, serviceName, urlMask, externalPort);
+  insertNewRow(icon, serviceName, subdomain, externalPort);
   clearForm();
 });
 
 // Add a new row
-function insertNewRow(icon, serviceName, urlMask, externalPort) {
+function insertNewRow(icon, serviceName, subdomain, externalPort) {
   fetch("/services", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       icon,
       serviceName,
-      urlMask,
+      subdomain,
       externalPort,
     }),
   })
@@ -60,32 +63,51 @@ function loadTableData() {
         loadLocalStorageUrlData();
 
       services.forEach((service) => {
-        const cloudflareLink = `${cloudflareBase.replace(
-          /\/$/,
-          ""
-        )}/${service.urlMask.replace(/^\//, "")}`;
+        const regex = /^(https?:)\/\/(.*)/;
+        const protocolMatch = regex.exec(cloudflareBase);
+        const protocol = protocolMatch ? protocolMatch[1] : "https:";
+        const domain = protocolMatch
+          ? protocolMatch[2].replace(/\/+$/, "")
+          : cloudflareBase.replace(/\/+$/, "");
+
+        const cloudflareLink = `${protocol}//${service.subdomain}.${domain}`;
         const tailscaleLink = `${tailscaleBase}:${service.externalPort}`;
         const localhostLink = `${localhostBase}:${service.externalPort}`;
 
         const row = `
-                <tr>
-                    <td><img src="${service.icon}" alt="Icon" width="30" height="30"></td>
-                    <td>${service.serviceName}</td>
-                    <td><a href="${cloudflareLink}" class="serviceUrl" target="_blank">${cloudflareLink}</a></td>
-                    <td><a href="${tailscaleLink}" class="serviceUrl" target="_blank">${tailscaleLink}</a></td>
-                    <td><a href="${localhostLink}" class="serviceUrl" target="_blank">${localhostLink}</a></td>
-                    <td>
-                        <button class="button edit-button" onclick="editRow(${service.id})">Edit</button>
-                        <button class="button delete-button" onclick="deleteRow(${service.id})">Delete</button>
-                    </td>
-                </tr>
-            `;
+          <tr class="border-b hover:bg-gray-100 dark:hover:bg-gray-700">
+            <td class="py-4 px-6">
+            ${
+              service.icon
+                ? `<img src="${service.icon}" alt="Icon" class="w-12 h-12 mx-auto"></td>`
+                : ""
+            }
+            <td class="py-4 px-6">${service.serviceName}</td>
+            <td class="py-4 px-6">
+            ${
+              service.subdomain
+                ? `<a href="${cloudflareLink}" class="text-blue-500 hover:underline" target="_blank">${cloudflareLink}</a>`
+                : ""
+            } 
+            </td>
+            <td class="py-4 px-6"><a href="${tailscaleLink}" class="text-blue-500 hover:underline" target="_blank">${tailscaleLink}</a></td>
+            <td class="py-4 px-6"><a href="${localhostLink}" class="text-blue-500 hover:underline" target="_blank">${localhostLink}</a></td>
+            <td class="py-4 px-6">
+              <button class="px-4 py-2 bg-yellow-500 text-white rounded-lg shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500" onclick="editRow(${
+                service.id
+              })">Edit</button>
+              <button class="px-4 py-2 bg-red-500 text-white rounded-lg shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="deleteRow(${
+                service.id
+              })">Delete</button>
+            </td>
+          </tr>
+        `;
         tableBody.innerHTML += row;
       });
     });
 }
 
-//  Modify Row
+// Modify Row
 function editRow(id) {
   selectedId = id;
   fetch(`/services/${id}`)
@@ -93,7 +115,7 @@ function editRow(id) {
     .then((service) => {
       document.getElementById("iconInput").value = service.icon;
       document.getElementById("serviceNameInput").value = service.serviceName;
-      document.getElementById("urlMaskInput").value = service.urlMask;
+      document.getElementById("subdomainInput").value = service.subdomain;
       document.getElementById("externalPortInput").value = service.externalPort;
 
       document.getElementById("addServiceBtn").style.display = "none";
@@ -108,7 +130,7 @@ document
   .addEventListener("click", function () {
     const icon = document.getElementById("iconInput").value;
     const serviceName = document.getElementById("serviceNameInput").value;
-    const urlMask = document.getElementById("urlMaskInput").value;
+    const subdomain = document.getElementById("subdomainInput").value;
     const externalPort = document.getElementById("externalPortInput").value;
 
     fetch(`/services/${selectedId}`, {
@@ -117,7 +139,7 @@ document
       body: JSON.stringify({
         icon,
         serviceName,
-        urlMask,
+        subdomain,
         externalPort,
       }),
     }).then(() => {
@@ -140,7 +162,7 @@ function deleteRow(id) {
 function clearForm() {
   document.getElementById("iconInput").value = "";
   document.getElementById("serviceNameInput").value = "";
-  document.getElementById("urlMaskInput").value = "";
+  document.getElementById("subdomainInput").value = "";
   document.getElementById("externalPortInput").value = "";
 
   selectedRow = null;
@@ -176,16 +198,43 @@ document
   .getElementById("iconInput")
   .addEventListener("blur", normalizeIconInput);
 
-// DOCKER SERVICES
-document.addEventListener("DOMContentLoaded", function () {
-  const dockerTableBody = document.querySelector("#dockerServiceTable tbody");
+// Search functionality
+document.getElementById("searchInput").addEventListener("input", function () {
+  const searchTerm = this.value.toLowerCase();
+  const rows = document.querySelectorAll("#serviceTable tbody tr");
 
+  rows.forEach((row) => {
+    const serviceName = row
+      .querySelector("td:nth-child(2)")
+      .textContent.toLowerCase();
+    if (serviceName.includes(searchTerm)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+});
+
+// Load Docker Data
+function loadDockerData() {
   fetch("/docker/containers")
     .then((response) => response.json())
     .then((projects) => {
+      const dockerTableBody = document.querySelector(
+        "#dockerServiceTable tbody"
+      );
       dockerTableBody.innerHTML = "";
 
       Object.entries(projects).forEach(([projectName, projectData]) => {
+        // Project Summary Row
+        const projectRow = document.createElement("tr");
+        projectRow.className = "border-b bg-gray-200 dark:bg-gray-700";
+        projectRow.innerHTML = `
+          <td class="py-4 px-6 font-bold" colspan="4">${projectName} (${projectData.containerCount} containers)</td>
+        `;
+        dockerTableBody.appendChild(projectRow);
+
+        // Container Rows
         Object.entries(projectData.services).forEach(
           ([serviceName, serviceData]) => {
             serviceData.containers.forEach((container) => {
@@ -197,14 +246,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .join(", ");
 
-              const dockerRow = document.createElement("tr");
-
-              dockerRow.innerHTML = `
-              <td>${projectName}</td>
-              <td>${serviceName}</td>
-              <td>${container.state} (${container.status})</td>
-              <td>${ports || "-"}</td>`;
-              dockerTableBody.appendChild(dockerRow);
+              const containerRow = document.createElement("tr");
+              containerRow.className =
+                "border-b hover:bg-gray-100 dark:hover:bg-gray-700";
+              containerRow.innerHTML = `
+              <td class="py-4 px-6"></td>
+              <td class="py-4 px-6">${container.name}</td>
+              <td class="py-4 px-6">${container.state} (${
+                container.status
+              })</td>
+              <td class="py-4 px-6">${ports || "-"}</td>
+            `;
+              dockerTableBody.appendChild(containerRow);
             });
           }
         );
@@ -213,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch((error) => {
       console.error("Error fetching Docker data:", error);
     });
-});
+}
 
 function loadLocalStorageUrlData() {
   const cloudflareBase = localStorage.getItem("cloudflareBase") || "";
