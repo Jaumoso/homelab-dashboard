@@ -102,7 +102,13 @@ function loadTableData() {
             </td>
           </tr>
         `;
-        tableBody.innerHTML += row;
+        // Create a temporary element to parse the row string safely
+        const temp = document.createElement("tbody");
+        temp.innerHTML = row;
+        // Append each child node (tr) to the table body
+        Array.from(temp.children).forEach((child) =>
+          tableBody.appendChild(child)
+        );
       });
     });
 }
@@ -225,6 +231,26 @@ function loadDockerData() {
       );
       dockerTableBody.innerHTML = "";
 
+      // Helper function to create and append a container row
+      function appendContainerRow(container) {
+        const ports = container.ports
+          .map((p) => {
+            return `${p.ip || "localhost"}:${p.public || p.private}/${p.type}`;
+          })
+          .join(", ");
+
+        const containerRow = document.createElement("tr");
+        containerRow.className =
+          "border-b hover:bg-gray-100 dark:hover:bg-gray-700";
+        containerRow.innerHTML = `
+          <td class="py-4 px-6"></td>
+          <td class="py-4 px-6">${container.name}</td>
+          <td class="py-4 px-6">${container.state} (${container.status})</td>
+          <td class="py-4 px-6">${ports || "-"}</td>
+        `;
+        dockerTableBody.appendChild(containerRow);
+      }
+
       Object.entries(projects).forEach(([projectName, projectData]) => {
         // Project Summary Row
         const projectRow = document.createElement("tr");
@@ -237,28 +263,7 @@ function loadDockerData() {
         // Container Rows
         Object.entries(projectData.services).forEach(
           ([serviceName, serviceData]) => {
-            serviceData.containers.forEach((container) => {
-              const ports = container.ports
-                .map((p) => {
-                  return `${p.ip || "localhost"}:${p.public || p.private}/${
-                    p.type
-                  }`;
-                })
-                .join(", ");
-
-              const containerRow = document.createElement("tr");
-              containerRow.className =
-                "border-b hover:bg-gray-100 dark:hover:bg-gray-700";
-              containerRow.innerHTML = `
-              <td class="py-4 px-6"></td>
-              <td class="py-4 px-6">${container.name}</td>
-              <td class="py-4 px-6">${container.state} (${
-                container.status
-              })</td>
-              <td class="py-4 px-6">${ports || "-"}</td>
-            `;
-              dockerTableBody.appendChild(containerRow);
-            });
+            serviceData.containers.forEach(appendContainerRow);
           }
         );
       });
