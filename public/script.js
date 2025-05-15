@@ -25,31 +25,23 @@ document.getElementById("themeToggle").addEventListener("click", function () {
 document.getElementById("addServiceBtn").addEventListener("click", function () {
   const icon = document.getElementById("iconInput").value;
   const serviceName = document.getElementById("serviceNameInput").value;
-  const cloudflareLink = document.getElementById("cloudflareLinkInput").value;
-  const tailscaleLink = document.getElementById("tailscaleLinkInput").value;
-  const localhostLink = document.getElementById("localhostLinkInput").value;
+  const urlMask = document.getElementById("urlMaskInput").value;
+  const externalPort = document.getElementById("externalPortInput").value;
 
-  insertNewRow(icon, serviceName, cloudflareLink, tailscaleLink, localhostLink);
+  insertNewRow(icon, serviceName, urlMask, externalPort);
   clearForm();
 });
 
 // Add a new row
-function insertNewRow(
-  icon,
-  serviceName,
-  cloudflareLink,
-  tailscaleLink,
-  localhostLink
-) {
+function insertNewRow(icon, serviceName, urlMask, externalPort) {
   fetch("/services", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       icon,
       serviceName,
-      cloudflareLink,
-      tailscaleLink,
-      localhostLink,
+      urlMask,
+      externalPort,
     }),
   })
     .then((response) => response.json())
@@ -64,14 +56,24 @@ function loadTableData() {
       const tableBody = document.querySelector("#serviceTable tbody");
       tableBody.innerHTML = "";
 
+      const { cloudflareBase, tailscaleBase, localhostBase } =
+        loadLocalStorageUrlData();
+
       services.forEach((service) => {
+        const cloudflareLink = `${cloudflareBase.replace(
+          /\/$/,
+          ""
+        )}/${service.urlMask.replace(/^\//, "")}`;
+        const tailscaleLink = `${tailscaleBase}:${service.externalPort}`;
+        const localhostLink = `${localhostBase}:${service.externalPort}`;
+
         const row = `
                 <tr>
                     <td><img src="${service.icon}" alt="Icon" width="30" height="30"></td>
                     <td>${service.serviceName}</td>
-                    <td><a href="${service.cloudflareLink}" class="serviceUrl" target="_blank">${service.cloudflareLink}</a></td>
-                    <td><a href="${service.tailscaleLink}" class="serviceUrl" target="_blank">${service.tailscaleLink}</a></td>
-                    <td><a href="${service.localhostLink}" class="serviceUrl" target="_blank">${service.localhostLink}</a></td>
+                    <td><a href="${cloudflareLink}" class="serviceUrl" target="_blank">${cloudflareLink}</a></td>
+                    <td><a href="${tailscaleLink}" class="serviceUrl" target="_blank">${tailscaleLink}</a></td>
+                    <td><a href="${localhostLink}" class="serviceUrl" target="_blank">${localhostLink}</a></td>
                     <td>
                         <button class="button edit-button" onclick="editRow(${service.id})">Edit</button>
                         <button class="button delete-button" onclick="deleteRow(${service.id})">Delete</button>
@@ -91,12 +93,8 @@ function editRow(id) {
     .then((service) => {
       document.getElementById("iconInput").value = service.icon;
       document.getElementById("serviceNameInput").value = service.serviceName;
-      document.getElementById("cloudflareLinkInput").value =
-        service.cloudflareLink;
-      document.getElementById("tailscaleLinkInput").value =
-        service.tailscaleLink;
-      document.getElementById("localhostLinkInput").value =
-        service.localhostLink;
+      document.getElementById("urlMaskInput").value = service.urlMask;
+      document.getElementById("externalPortInput").value = service.externalPort;
 
       document.getElementById("addServiceBtn").style.display = "none";
       document.getElementById("updateServiceBtn").style.display = "inline";
@@ -110,9 +108,8 @@ document
   .addEventListener("click", function () {
     const icon = document.getElementById("iconInput").value;
     const serviceName = document.getElementById("serviceNameInput").value;
-    const cloudflareLink = document.getElementById("cloudflareLinkInput").value;
-    const tailscaleLink = document.getElementById("tailscaleLinkInput").value;
-    const localhostLink = document.getElementById("localhostLinkInput").value;
+    const urlMask = document.getElementById("urlMaskInput").value;
+    const externalPort = document.getElementById("externalPortInput").value;
 
     fetch(`/services/${selectedId}`, {
       method: "PUT",
@@ -120,9 +117,8 @@ document
       body: JSON.stringify({
         icon,
         serviceName,
-        cloudflareLink,
-        tailscaleLink,
-        localhostLink,
+        urlMask,
+        externalPort,
       }),
     }).then(() => {
       loadTableData();
@@ -144,9 +140,8 @@ function deleteRow(id) {
 function clearForm() {
   document.getElementById("iconInput").value = "";
   document.getElementById("serviceNameInput").value = "";
-  document.getElementById("cloudflareLinkInput").value = "";
-  document.getElementById("tailscaleLinkInput").value = "";
-  document.getElementById("localhostLinkInput").value = "";
+  document.getElementById("urlMaskInput").value = "";
+  document.getElementById("externalPortInput").value = "";
 
   selectedRow = null;
   selectedId = null;
@@ -203,39 +198,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 .join(", ");
 
               const dockerRow = document.createElement("tr");
+
               dockerRow.innerHTML = `
               <td>${projectName}</td>
               <td>${serviceName}</td>
               <td>${container.state} (${container.status})</td>
-              <td>${ports || "-"}</td>
-              <td><button class="button" data-service='${JSON.stringify({
-                icon: `https://cdn.jsdelivr.net/gh/selfhst/icons/png/${serviceName}.png`,
-                serviceName: serviceName,
-                cloudflareLink: "",
-                tailscaleLink: "",
-                localhostLink: ports ? `http://${ports.split(", ")[0]}` : "",
-              })}'>Use this</button></td>
-            `;
+              <td>${ports || "-"}</td>`;
               dockerTableBody.appendChild(dockerRow);
             });
           }
         );
-      });
-
-      // Prefill form on click
-      dockerTableBody.addEventListener("click", function (e) {
-        if (e.target && e.target.matches("button[data-service]")) {
-          const data = JSON.parse(e.target.getAttribute("data-service"));
-
-          document.getElementById("iconInput").value = data.icon;
-          document.getElementById("serviceNameInput").value = data.serviceName;
-          document.getElementById("cloudflareLinkInput").value =
-            data.cloudflareLink;
-          document.getElementById("tailscaleLinkInput").value =
-            data.tailscaleLink;
-          document.getElementById("localhostLinkInput").value =
-            data.localhostLink;
-        }
       });
     })
     .catch((error) => {
@@ -243,14 +215,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function loadLocalStorageUrlData() {
+  const cloudflareBase = localStorage.getItem("cloudflareBase") || "";
+  const tailscaleBase = localStorage.getItem("tailscaleBase") || "";
+  const localhostBase = localStorage.getItem("localhostBase") || "";
+
+  return {
+    cloudflareBase,
+    tailscaleBase,
+    localhostBase,
+  };
+}
+
 // DEFAULT URLS
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("cloudflareBaseInput").value =
-    localStorage.getItem("cloudflareBase") || "https://example.com";
-  document.getElementById("tailscaleBaseInput").value =
-    localStorage.getItem("tailscaleBase") || "http://homelab";
-  document.getElementById("localhostBaseInput").value =
-    localStorage.getItem("localhostBase") || "http://127.0.0.1";
+  const { cloudflareBase, tailscaleBase, localhostBase } =
+    loadLocalStorageUrlData();
+  document.getElementById("cloudflareBaseInput").value = cloudflareBase;
+  document.getElementById("tailscaleBaseInput").value = tailscaleBase;
+  document.getElementById("localhostBaseInput").value = localhostBase;
 });
 
 // Save base URLs

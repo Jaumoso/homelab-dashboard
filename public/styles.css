@@ -64,6 +64,25 @@ input[type="url"] {
   text-align: center;
 }
 
+.base-urls-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.base-urls-container label {
+  margin-right: 10px;
+}
+
+.base-urls-container input[type="url"] {
+  flex: 1;
+  margin-right: 10px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+
 /* Tema oscuro */
 
 .header-container {

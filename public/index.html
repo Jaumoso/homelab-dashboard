@@ -36,34 +36,28 @@
       <h3 id="form-title">Add New Service</h3>
       <input type="text" id="iconInput" placeholder="Icon URL / Service Name" />
       <input type="text" id="serviceNameInput" placeholder="Service Name" />
-      <input
-        type="url"
-        id="cloudflareLinkInput"
-        placeholder="Cloudflare Link"
-      />
-      <input type="url" id="tailscaleLinkInput" placeholder="Tailscale Link" />
-      <input type="url" id="localhostLinkInput" placeholder="Localhost Link" />
+      <input type="text" id="urlMaskInput" placeholder="URL Submask" />
+      <input type="text" id="externalPortInput" placeholder="External Port" />
       <br />
       <button class="button" id="addServiceBtn">Add Service</button>
       <button class="button" id="updateServiceBtn" hidden>Save changes</button>
     </div>
     <br />
 
-    <div id="form-container">
+    <div id="form-container" class="base-urls-container">
+      <label for="cloudflareBaseInput">Custom domain:</label>
       <input
         type="url"
         id="cloudflareBaseInput"
-        placeholder="Cloudflare Base URL - https://example.com"
+        placeholder="https://example.com"
       />
-      <input
-        type="url"
-        id="tailscaleBaseInput"
-        placeholder="Tailscale Base URL - http://homelab"
-      />
+      <label for="tailscaleBaseInput">Tailscale Host:</label>
+      <input type="url" id="tailscaleBaseInput" placeholder="http://homelab" />
+      <label for="localhostBaseInput">Localhost / LAN:</label>
       <input
         type="url"
         id="localhostBaseInput"
-        placeholder="Localhost Base URL - http://127.0.0.1"
+        placeholder="http://127.0.0.1"
       />
       <br />
       <button id="saveBaseUrlsBtn" class="button">Save</button>
@@ -78,7 +72,6 @@
             <th>Service</th>
             <th>Status</th>
             <th>Ports</th>
-            <th>Action</th>
           </tr>
         </thead>
         <tbody></tbody>

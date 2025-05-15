@@ -34,7 +34,7 @@ const db = new sqlite3.Database(`./server/db/services.db`, (err) => {
     console.error("Error opening database:", err.message);
   } else {
     db.run(
-      "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, cloudflareLink TEXT, tailscaleLink TEXT, localhostLink TEXT)",
+      "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, urlMask TEXT, externalPort TEXT)",
       (err) => {
         if (err) {
           console.log("Error creating table:", err.message);
@@ -66,17 +66,10 @@ app.get("/services/:id", (req, res) => {
 
 // Add a new service
 app.post("/services", (req, res) => {
-  const { icon, serviceName, cloudflareLink, tailscaleLink, localhostLink } =
-    req.body;
+  const { icon, serviceName, urlMask, externalPort } = req.body;
   const sql =
-    "INSERT INTO services (icon, serviceName, cloudflareLink, tailscaleLink, localhostLink) VALUES (?, ?, ?, ?, ?)";
-  const params = [
-    icon,
-    serviceName,
-    cloudflareLink,
-    tailscaleLink,
-    localhostLink,
-  ];
+    "INSERT INTO services (icon, serviceName, urlMask, externalPort) VALUES (?, ?, ?, ?)";
+  const params = [icon, serviceName, urlMask, externalPort];
   db.run(sql, params, function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -87,18 +80,10 @@ app.post("/services", (req, res) => {
 
 // Modify a service
 app.put("/services/:id", (req, res) => {
-  const { icon, serviceName, cloudflareLink, tailscaleLink, localhostLink } =
-    req.body;
+  const { icon, serviceName, urlMask, externalPort } = req.body;
   const sql =
-    "UPDATE services SET icon = ?, serviceName = ?, cloudflareLink = ?, tailscaleLink = ?, localhostLink = ? WHERE id = ?";
-  const params = [
-    icon,
-    serviceName,
-    cloudflareLink,
-    tailscaleLink,
-    localhostLink,
-    req.params.id,
-  ];
+    "UPDATE services SET icon = ?, serviceName = ?, urlMask = ?, externalPort = ? WHERE id = ?";
+  const params = [icon, serviceName, urlMask, externalPort, req.params.id];
   db.run(sql, params, function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -118,73 +103,86 @@ app.delete("/services/:id", (req, res) => {
   });
 });
 
-// app.get("/containers", async (req, res) => {
+// app.get("/docker/containers", async (_, res) => {
 //   try {
-//     const containers = await docker.listContainers();
-//     const services = containers.map((container) => {
-//       const ports = container.Ports.map((port) => ({
-//         internal: port.PrivatePort,
-//         external: port.PublicPort,
-//         type: port.Type,
-//         ip: port.IP,
-//       }));
-//       return {
+//     const containers = await docker.listContainers({ all: false });
+
+//     const projects = {};
+
+//     containers.forEach((container) => {
+//       const labels = container.Labels || {};
+//       const project = labels["com.docker.compose.project"];
+//       const service = labels["com.docker.compose.service"];
+
+//       if (!project || !service) return;
+
+//       if (!projects[project]) {
+//         projects[project] = {
+//           containerCount: 0,
+//           services: {},
+//         };
+//       }
+
+//       projects[project].containerCount += 1;
+
+//       if (!projects[project].services[service]) {
+//         projects[project].services[service] = {
+//           containers: [],
+//         };
+//       }
+
+//       projects[project].services[service].containers.push({
 //         id: container.Id,
-//         name: container.Names[0].substring(1),
-//         state: container.State,
+//         name: container.Names?.[0]?.replace(/^\//, "") || "",
 //         status: container.Status,
-//         ports: ports,
-//       };
+//         state: container.State,
+//         ports: container.Ports.map((p) => ({
+//           private: p.PrivatePort,
+//           public: p.PublicPort,
+//           type: p.Type,
+//           ip: p.IP,
+//         })),
+//       });
 //     });
-//     res.json(services);
+
+//     res.json(projects);
 //   } catch (err) {
+//     console.error("Error al obtener contenedores:", err);
 //     res.status(500).json({ error: err.message });
 //   }
 // });
 
-app.get("/docker/containers", async (req, res) => {
+app.get("/docker/containers", async (_, res) => {
   try {
-    const containers = await docker.listContainers({ all: false });
+    // Mock de contenedor
+    const mockProjects = {
+      "mock-project": {
+        containerCount: 1,
+        services: {
+          "mock-service": {
+            containers: [
+              {
+                id: "1234567890abcdef",
+                name: "mock-container",
+                status: "Up 10 minutes",
+                state: "running",
+                ports: [
+                  {
+                    private: 3000,
+                    public: 8080,
+                    type: "tcp",
+                    ip: "0.0.0.0",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    };
 
-    const projects = {};
-
-    containers.forEach((container) => {
-      const labels = container.Labels || {};
-      const project = labels["com.docker.compose.project"];
-      const service = labels["com.docker.compose.service"];
-
-      if (!project || !service) return;
-
-      if (!projects[project]) {
-        projects[project] = {
-          containerCount: 0,
-          services: {},
-        };
-      }
-
-      projects[project].containerCount += 1;
-
-      if (!projects[project].services[service]) {
-        projects[project].services[service] = {
-          containers: [],
-        };
-      }
-
-      projects[project].services[service].containers.push({
-        id: container.Id,
-        name: container.Names?.[0]?.replace(/^\//, "") || "",
-        status: container.Status,
-        state: container.State,
-        ports: container.Ports.map((p) => ({
-          private: p.PrivatePort,
-          public: p.PublicPort,
-          type: p.Type,
-          ip: p.IP,
-        })),
-      });
-    });
-
-    res.json(projects);
+    // Devuelve el mock directamente
+    res.json(mockProjects);
   } catch (err) {
     console.error("Error al obtener contenedores:", err);
     res.status(500).json({ error: err.message });
