@@ -5,108 +5,170 @@ const bodyParser = require("body-parser");
 const RateLimit = require("express-rate-limit");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
-
 const Docker = require("dockerode");
-const docker = new Docker({ socketPath: "/var/run/docker.sock" });
-// const docker = new Docker({
-//   socketPath: "tcp://127.0.0.1:2375", // Usar TCP en Windows
-// });
-
-const limiter = RateLimit({
-  windowsMs: 5 * 60 * 1000, // 5 minutes
-  max: 100, // max 100 requests per windowMS
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Initialize Docker
+const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+
+// Rate limiter middleware
+const limiter = RateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+});
+
+// Middleware setup
 app.use(cors());
 app.use(bodyParser.json());
 app.use(limiter);
+app.set("trust proxy", 1); // Trust first proxy
 
-// Trust frontend proxy
-app.set("trust proxy", 1);
-
-// Connection to SQLite database
-const db = new sqlite3.Database(`./server/db/services.db`, (err) => {
-  if (err) {
-    console.error("Error opening database:", err.message);
-  } else {
-    db.run(
-      "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, subdomain TEXT, externalPort TEXT)",
-      (err) => {
-        if (err) {
-          console.log("Error creating table:", err.message);
+// SQLite database connection
+const db = new sqlite3.Database(
+  path.resolve(__dirname, "./db/services.db"),
+  (err) => {
+    if (err) {
+      console.error("Error opening database:", err.message);
+    } else {
+      db.run(
+        "CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY, icon TEXT, serviceName TEXT, publicUrl TEXT, tailscaleUrl TEXT, localUrl TEXT, externalPort TEXT)",
+        (err) => {
+          if (err) {
+            console.error("Error creating table:", err.message);
+          }
         }
-      }
-    );
+      );
+    }
   }
-});
+);
+
+// Configuration storage
+const configTable = "config";
+
+// Create config table if it doesn't exist
+db.run(`CREATE TABLE IF NOT EXISTS ${configTable} (
+  id INTEGER PRIMARY KEY,
+  publicDomains TEXT,
+  tailscaleHost TEXT,
+  localHost TEXT
+)`);
 
 // Obtain all services
-app.get("/services", (req, res) => {
+app.get("/api/services", (req, res) => {
   db.all("SELECT * FROM services", [], (err, rows) => {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
     res.json(rows);
   });
 });
 
 // Obtain a service by its id
-app.get("/services/:id", (req, res) => {
+app.get("/api/services/:id", (req, res) => {
   db.get("SELECT * FROM services WHERE id = ?", [req.params.id], (err, row) => {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
     res.json(row);
   });
 });
 
 // Add a new service
-app.post("/services", (req, res) => {
-  const { icon, serviceName, subdomain, externalPort } = req.body;
+app.post("/api/services", (req, res) => {
+  const { icon, serviceName, publicUrl, tailscaleUrl, localUrl, externalPort } =
+    req.body;
   const sql =
-    "INSERT INTO services (icon, serviceName, subdomain, externalPort) VALUES (?, ?, ?, ?)";
-  const params = [icon, serviceName, subdomain, externalPort];
+    "INSERT INTO services (icon, serviceName, publicUrl, tailscaleUrl, localUrl, externalPort) VALUES (?, ?, ?, ?, ?, ?)";
+  const params = [
+    icon,
+    serviceName,
+    publicUrl,
+    tailscaleUrl,
+    localUrl,
+    externalPort,
+  ];
+
   db.run(sql, params, function (err) {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
-    res.json({ id: this.lastID });
+    res.status(201).json({ id: this.lastID });
   });
 });
 
 // Modify a service
-app.put("/services/:id", (req, res) => {
-  const { icon, serviceName, subdomain, externalPort } = req.body;
+app.put("/api/services/:id", (req, res) => {
+  const { icon, serviceName, publicUrl, tailscaleUrl, localUrl, externalPort } =
+    req.body;
   const sql =
-    "UPDATE services SET icon = ?, serviceName = ?, subdomain = ?, externalPort = ? WHERE id = ?";
-  const params = [icon, serviceName, subdomain, externalPort, req.params.id];
+    "UPDATE services SET icon = ?, serviceName = ?, publicUrl = ?, tailscaleUrl = ?, localUrl = ?, externalPort = ? WHERE id = ?";
+  const params = [
+    icon,
+    serviceName,
+    publicUrl,
+    tailscaleUrl,
+    localUrl,
+    externalPort,
+    req.params.id,
+  ];
+
   db.run(sql, params, function (err) {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
     res.json({ updatedID: this.changes });
   });
 });
 
 // Remove a service
-app.delete("/services/:id", (req, res) => {
+app.delete("/api/services/:id", (req, res) => {
   const sql = "DELETE FROM services WHERE id = ?";
   db.run(sql, req.params.id, function (err) {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     }
     res.json({ deletedID: this.changes });
   });
 });
 
-app.get("/docker/containers", async (_, res) => {
-  try {
-    const containers = await docker.listContainers({ all: false });
+// Get configuration
+app.get("/api/config", (req, res) => {
+  db.get(`SELECT * FROM ${configTable} WHERE id = 1`, (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(row || { publicDomains: [], tailscaleHost: "", localHost: "" });
+  });
+});
 
+// Save configuration
+app.post("/api/config", (req, res) => {
+  const { publicDomains, tailscaleHost, localHost } = req.body;
+  const sql = `INSERT INTO ${configTable} (id, publicDomains, tailscaleHost, localHost) VALUES (1, ?, ?, ?)
+               ON CONFLICT(id) DO UPDATE SET publicDomains = ?, tailscaleHost = ?, localHost = ?`;
+  const params = [
+    JSON.stringify(publicDomains),
+    tailscaleHost,
+    localHost,
+    JSON.stringify(publicDomains),
+    tailscaleHost,
+    localHost,
+  ];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: "Configuration saved successfully!" });
+  });
+});
+
+// Docker containers endpoint
+app.get("/api/docker/containers", async (req, res) => {
+  try {
+    const containers = await docker.listContainers({ all: true });
     const projects = {};
 
     containers.forEach((container) => {
@@ -117,18 +179,13 @@ app.get("/docker/containers", async (_, res) => {
       if (!project || !service) return;
 
       if (!projects[project]) {
-        projects[project] = {
-          containerCount: 0,
-          services: {},
-        };
+        projects[project] = { containerCount: 0, services: {} };
       }
 
       projects[project].containerCount += 1;
 
       if (!projects[project].services[service]) {
-        projects[project].services[service] = {
-          containers: [],
-        };
+        projects[project].services[service] = { containers: [] };
       }
 
       projects[project].services[service].containers.push({
@@ -144,120 +201,24 @@ app.get("/docker/containers", async (_, res) => {
         })),
       });
     });
-
+    console.log(projects);
     res.json(projects);
   } catch (err) {
-    console.error("Error al obtener contenedores:", err);
+    console.error("Error fetching containers:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// app.get("/docker/containers", async (_, res) => {
-//   try {
-//     // Mock de contenedor
-//     const mockProjects = {
-//       "mock-project": {
-//         containerCount: 1,
-//         services: {
-//           "mock-service": {
-//             containers: [
-//               {
-//                 id: "1234567890abcdef",
-//                 name: "mock-container",
-//                 status: "Up 10 minutes",
-//                 state: "running",
-//                 ports: [
-//                   {
-//                     private: 3000,
-//                     public: 8080,
-//                     type: "tcp",
-//                     ip: "0.0.0.0",
-//                   },
-//                 ],
-//               },
-//             ],
-//           },
-//         },
-//       },
-//       "mock-project2": {
-//         containerCount: 2,
-//         services: {
-//           "mock-service1": {
-//             containers: [
-//               {
-//                 id: "1234567890abcdef",
-//                 name: "mock-container",
-//                 status: "Up 10 minutes",
-//                 state: "running",
-//                 ports: [
-//                   {
-//                     private: 3000,
-//                     public: 8080,
-//                     type: "tcp",
-//                     ip: "0.0.0.0",
-//                   },
-//                 ],
-//               },
-//             ],
-//           },
-//           "mock-service2": {
-//             containers: [
-//               {
-//                 id: "1234567890abcdef",
-//                 name: "mock-container",
-//                 status: "Up 10 minutes",
-//                 state: "running",
-//                 ports: [
-//                   {
-//                     private: 3000,
-//                     public: 8080,
-//                     type: "tcp",
-//                     ip: "0.0.0.0",
-//                   },
-//                 ],
-//               },
-//               {
-//                 id: "sadadsdsddsd",
-//                 name: "mock-container",
-//                 status: "Up 10 minutes",
-//                 state: "running",
-//                 ports: [
-//                   {
-//                     private: 3000,
-//                     public: 8080,
-//                     type: "tcp",
-//                     ip: "0.0.0.0",
-//                   },
-//                   {
-//                     private: 3000,
-//                     public: 8080,
-//                     type: "tcp",
-//                     ip: "0.0.0.0",
-//                   },
-//                 ],
-//               },
-//             ],
-//           },
-//         },
-//       },
-//     };
-
-//     // Devuelve el mock directamente
-//     res.json(mockProjects);
-//   } catch (err) {
-//     console.error("Error al obtener contenedores:", err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
+// Serve static files
 const frontendPath = path.resolve(__dirname, "../public");
 app.use(express.static(frontendPath));
 
-app.get("/", (_, res) => {
+// Serve the main HTML file
+app.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Turn on the server
+// Start the server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
