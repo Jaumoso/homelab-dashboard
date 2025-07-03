@@ -3,181 +3,340 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homelab</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-    />
-    <link rel="Icon" href="./assets/icon24.png" type="image/x-icon" />
+    <title>Homelab Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="./assets/icon24.png" type="image/x-icon" />
   </head>
-  <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <body
+    class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+  >
     <div class="container mx-auto p-4">
       <!-- Enhanced Header -->
       <div
-        class="header-container flex justify-center items-center relative py-8 mb-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg"
+        class="header-container flex justify-center items-center relative py-8 mb-8 bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl shadow-2xl"
       >
         <h1 class="text-4xl font-bold text-center flex-1 text-white">
-          Homelab Services
+          Homelab Dashboard
         </h1>
         <div class="theme-toggle absolute right-4">
           <button
             id="themeToggle"
-            class="p-2 bg-white dark:bg-gray-800 rounded-full shadow"
+            class="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <img
+            <svg
               id="themeIcon"
-              src="assets/theme32.png"
-              alt="Theme button"
-              class="w-8 h-8"
-            />
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
+            </svg>
           </button>
         </div>
       </div>
 
-      <!-- Search Bar for Service Table -->
-      <div class="mb-4">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search services..."
-          class="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <!-- Configuration Panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Domain Configuration -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4 flex items-center">
+            <svg
+              class="w-6 h-6 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+              ></path>
+            </svg>
+            Domain Configuration
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2"
+                >Public Domains</label
+              >
+              <div id="publicDomainsContainer" class="space-y-2">
+                <!-- Public domains will be loaded here -->
+              </div>
+              <button
+                id="addPublicDomainBtn"
+                class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                Add Domain
+              </button>
+            </div>
+            <div>
+              <label
+                for="tailscaleBaseInput"
+                class="block text-sm font-medium mb-2"
+                >Tailscale Host</label
+              >
+              <input
+                type="text"
+                id="tailscaleBaseInput"
+                placeholder="http://homelab"
+                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label
+                for="localhostBaseInput"
+                class="block text-sm font-medium mb-2"
+                >Local Host</label
+              >
+              <input
+                type="text"
+                id="localhostBaseInput"
+                placeholder="http://192.168.1.20"
+                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              id="saveConfigBtn"
+              class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Save Configuration
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Add from Docker -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4 flex items-center">
+            <svg
+              class="w-6 h-6 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              ></path>
+            </svg>
+            Quick Add from Docker
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label
+                for="dockerServiceSelect"
+                class="block text-sm font-medium mb-2"
+                >Select Docker Service</label
+              >
+              <select
+                id="dockerServiceSelect"
+                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Choose a service...</option>
+              </select>
+            </div>
+            <div>
+              <label for="domainSelect" class="block text-sm font-medium mb-2"
+                >Select Public Domain</label
+              >
+              <select
+                id="domainSelect"
+                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Choose a domain...</option>
+              </select>
+            </div>
+            <div>
+              <label for="subdomainInput" class="block text-sm font-medium mb-2"
+                >Subdomain (auto-filled)</label
+              >
+              <input
+                type="text"
+                id="subdomainInput"
+                placeholder="service-name"
+                class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <button
+              id="quickAddBtn"
+              class="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            >
+              Quick Add Service
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Service Table -->
-      <div
-        class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg"
-      >
-        <table id="serviceTable" class="min-w-full">
-          <thead>
-            <tr class="bg-gray-200 dark:bg-gray-700">
-              <th class="py-4 px-6 border-b">Icon</th>
-              <th class="py-4 px-6 border-b">Service Name</th>
-              <th class="py-4 px-6 border-b">Cloudflare Link</th>
-              <th class="py-4 px-6 border-b">Tailscale Link</th>
-              <th class="py-4 px-6 border-b">Localhost Link</th>
-              <th class="py-4 px-6 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <!-- Search Bar -->
+      <div class="mb-6">
+        <div class="relative">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search services..."
+            class="w-full p-4 pl-12 border rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <svg
+            class="absolute left-4 top-4 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
       </div>
 
-      <!-- Form Container -->
+      <!-- Services Table -->
       <div
-        id="form-container"
-        class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8"
       >
-        <h3 id="form-title" class="text-2xl font-bold mb-6">Add New Service</h3>
-        <input
-          type="text"
-          id="iconInput"
-          placeholder="Icon URL / Service Name"
-          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="text"
-          id="serviceNameInput"
-          placeholder="Service Name"
-          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="text"
-          id="subdomainInput"
-          placeholder="URL Submask"
-          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="text"
-          id="externalPortInput"
-          placeholder="External Port"
-          class="w-full p-3 mb-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <div class="flex space-x-4">
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b">
+          <h2 class="text-xl font-bold">Managed Services</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="serviceTable" class="min-w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="py-4 px-6 text-left font-medium">Icon</th>
+                <th class="py-4 px-6 text-left font-medium">Service</th>
+                <th class="py-4 px-6 text-left font-medium">Public URL</th>
+                <th class="py-4 px-6 text-left font-medium">Tailscale</th>
+                <th class="py-4 px-6 text-left font-medium">Local</th>
+                <th class="py-4 px-6 text-left font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="serviceTableBody">
+              <!-- Services will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Manual Add Service Form -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <h3 id="formTitle" class="text-xl font-bold mb-6">Add New Service</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="iconInput" class="block text-sm font-medium mb-2"
+              >Icon URL or Service Name</label
+            >
+            <input
+              type="text"
+              id="iconInput"
+              placeholder="jellyfin or https://..."
+              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label for="serviceNameInput" class="block text-sm font-medium mb-2"
+              >Service Name</label
+            >
+            <input
+              type="text"
+              id="serviceNameInput"
+              placeholder="Jellyfin Media Server"
+              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label
+              for="publicDomainSelect"
+              class="block text-sm font-medium mb-2"
+              >Public Domain</label
+            >
+            <select
+              id="publicDomainSelect"
+              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select domain...</option>
+            </select>
+          </div>
+          <div>
+            <label
+              for="subdomainManualInput"
+              class="block text-sm font-medium mb-2"
+              >Subdomain</label
+            >
+            <input
+              type="text"
+              id="subdomainManualInput"
+              placeholder="jellyfin"
+              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label for="portInput" class="block text-sm font-medium mb-2"
+              >Port</label
+            >
+            <input
+              type="text"
+              id="portInput"
+              placeholder="8096"
+              class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+        <div class="flex gap-4 mt-6">
           <button
-            class="flex-1 p-3 bg-green-500 text-white rounded-lg shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             id="addServiceBtn"
+            class="flex-1 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
           >
             Add Service
           </button>
           <button
-            class="flex-1 p-3 bg-yellow-500 text-white rounded-lg shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 hidden"
             id="updateServiceBtn"
+            class="flex-1 px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors hidden"
           >
-            Save changes
+            Update Service
+          </button>
+          <button
+            id="cancelBtn"
+            class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Cancel
           </button>
         </div>
       </div>
 
-      <!-- Base URLs Container -->
-      <div
-        id="form-container"
-        class="base-urls-container mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
-      >
-        <div class="flex flex-col space-y-4">
-          <div class="flex items-center">
-            <label for="cloudflareBaseInput" class="w-1/3 text-lg"
-              >Custom domain:</label
-            >
-            <input
-              type="url"
-              id="cloudflareBaseInput"
-              placeholder="https://example.com"
-              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div class="flex items-center">
-            <label for="tailscaleBaseInput" class="w-1/3 text-lg"
-              >Tailscale Host:</label
-            >
-            <input
-              type="url"
-              id="tailscaleBaseInput"
-              placeholder="http://homelab"
-              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div class="flex items-center">
-            <label for="localhostBaseInput" class="w-1/3 text-lg"
-              >Localhost / LAN:</label
-            >
-            <input
-              type="url"
-              id="localhostBaseInput"
-              placeholder="http://127.0.0.1"
-              class="flex-1 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-        <button
-          id="saveBaseUrlsBtn"
-          class="mt-6 p-3 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-        >
-          Save
-        </button>
-      </div>
-
       <!-- Docker Services -->
-      <div id="docker-services" class="mt-8">
-        <h3 class="text-2xl font-bold mb-6">Running Docker Compose Services</h3>
-        <div
-          class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg"
-        >
+      <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
+      >
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b">
+          <h2 class="text-xl font-bold">Running Docker Services</h2>
+        </div>
+        <div class="overflow-x-auto">
           <table id="dockerServiceTable" class="min-w-full">
-            <thead>
-              <tr class="bg-gray-200 dark:bg-gray-700">
-                <th class="py-4 px-6 border-b">Project</th>
-                <th class="py-4 px-6 border-b">Service</th>
-                <th class="py-4 px-6 border-b">Status</th>
-                <th class="py-4 px-6 border-b">Ports</th>
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="py-4 px-6 text-left font-medium">Project</th>
+                <th class="py-4 px-6 text-left font-medium">Service</th>
+                <th class="py-4 px-6 text-left font-medium">Status</th>
+                <th class="py-4 px-6 text-left font-medium">Ports</th>
+                <th class="py-4 px-6 text-left font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="dockerServiceTableBody">
+              <!-- Docker services will be loaded here -->
+            </tbody>
           </table>
         </div>
       </div>
     </div>
-
     <script src="script.js"></script>
   </body>
 </html>
